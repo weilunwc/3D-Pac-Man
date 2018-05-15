@@ -7,60 +7,71 @@
 
 #include "yspng.h"
 #include "yspngenc.h"
+#include "yssimplesound.h"
 #include "fssimplewindow.h"
 #include "maze.h"
 #include "maze3D.h"
 #include "view.h"
 #include <stdio.h>
 #include "score.h"
-class PlayImage{
-private:
-    YsRawPngDecoder img;
-public:
-    PlayImage();
-    void DrawBackground();
-};
-
-PlayImage::PlayImage(){
-    img.Decode("graphs/PlayBackground.png");
-    img.Flip();
-}
-
-void PlayImage::DrawBackground(){
-    /* fill background */
-    glColor3ub(3, 8, 20);
-    glBegin(GL_QUADS);
-    glVertex2i(0,0);
-    glVertex2i(1600,0);
-    glVertex2i(1600,600);
-    glVertex2i(0,600);
-    glEnd();
-	
-	/* Draw image */
-    glRasterPos2i(175,599);
-    glDrawPixels(img.wid,img.hei,GL_RGBA,GL_UNSIGNED_BYTE,img.rgba);
-}
 
 class Play{
 protected:
     YsRawPngDecoder img;
+	YsSoundPlayer musicPlayer;
+	YsSoundPlayer::SoundData pacman_death, scene, cherry, areyouready;
 	FullMaze maze;
     void DrawBackground();
 	void DrawCountDown();
 	void DrawGameInfo();
-	void DrawMaze();
+	void Draw2DMaze();
+	void Draw3DMaze();
 	time_t t0, dt, timeMax, timeLeft;
-	int lives, countDown, loopCount;
+	int lives, countDown, loopCount, totalPells;
 	bool exchangePlayers, pause;
+	void SendMazeCommand(int key);
+	void Setup();
+	void Update3DMaze();	
+
+	bool plot3d;
+	FullMaze_3D maze_3d;
+	View ghostView, pacView;
+	
+	int ***mazeArray;
+	PacMan pacInfo;
+	vector<Ghost> ghostInfo;
 public:
     Play();
+	Play(bool plot3d);
+	~Play(){musicPlayer.End();};
+
 	void Restart();
 	void Draw();
-	void SendMazeCommand(int key);
-
+	void Step(int key);
+	bool CheckEndCondition();
+	void PlayBackgroundMusic();
 };
 
 Play::Play(){
+	Setup();
+	plot3d = false;
+}
+
+Play::Play(bool plot3d){
+	this->plot3d = plot3d;
+	Setup();
+	if(plot3d == true){
+		mazeArray = new int**[6];
+		for(int i = 0;i < 6;i++){
+			mazeArray[i] = new int*[blockNumber];
+			for(int j = 0;j < blockNumber;j++){
+				mazeArray[i][j] = new int[blockNumber];
+			}
+		}
+	}
+}
+
+void Play::Setup(){
     /* Set up background */
 	img.Decode("graphs/PlayBackground.png");
     img.Flip();
@@ -70,10 +81,112 @@ Play::Play(){
 	
 	/* Game parameters */
 	timeMax = 60;
+	totalPells = 1883;	
+
+	/* Set up music */
+	musicPlayer.MakeCurrent();
+	musicPlayer.Start();
+	FsChangeToProgramDir();
+	/* Load sound data */
+	if (YSOK != pacman_death.LoadWav("music/pacman_death.wav")){
+		printf("Error!  Cannot load pacman_death.wav!\n");
+	}
+	if (YSOK != scene.LoadWav("music/scene.wav")){
+		printf("Error!  Cannot load scene.wav!\n");
+	}
+	if (YSOK != cherry.LoadWav("music/pacman_eatfruit.wav")){
+		printf("Error!  Cannot load pacman_eatfruit.wav!\n");
+	}
+	if (YSOK != areyouready.LoadWav("music/areyouready.wav")){
+		printf("Error!  Cannot load pacman_eatfruit.wav!\n");
+	}
 
 }
 
+bool Play::CheckEndCondition(){
+	if(dt >= timeMax || lives <= 0 || maze.perls == totalPells){
+		int perls = maze.perls;
+		if(exchangePlayers == true){
+			// game finished
+			return true;
+		}
+		else{
+			// switch players
+			//score.SetPlayer2(perls,lives,0,0,(int)totalTimeLeft);
+			//score.SetPlayer1(0,0,0,pac_eaten,2*(int)totalTimeLeft);
+			maze.Restart();
+			t0 = time(NULL);
+			dt = 0;
+			lives = 3;
+			timeLeft = timeMax;
+			loopCount = 0;
+			exchangePlayers = true;
+			countDown = 3;
+		}
+	}
+	return false;	
+}
+
+
+void Play::Step(int key){
+	time_t t;
+	if(pause == false && countDown <= 0){
+		/* Game running */
+	
+		/* Send commands to the pacman and ghost */
+		SendMazeCommand(key);
+		maze.PacMove();
+		int n = maze.cherries;
+		if(maze.cherries > n){
+			musicPlayer.Stop(scene);
+			musicPlayer.Stop(cherry);
+			musicPlayer.PlayOneShot(cherry);
+		}
+		maze.GhostMove(loopCount);
+		if(maze.CollisionDetect()){
+			musicPlayer.Stop(scene);
+			musicPlayer.Stop(pacman_death);
+			musicPlayer.PlayOneShot(pacman_death);
+			lives--;
+			//pac_eaten++;
+			//totalTimeLeft += timeLeft;
+			maze.SwitchGhost(0);
+		}
+		// update the time
+		t = time(NULL);
+		dt += (t - t0);
+		t0 = time(NULL);
+		timeLeft = timeMax - dt;
+		// all data is set here, display
+		if(loopCount == 50){
+			maze.SetCherry();
+		}
+		if(loopCount == 150){
+			maze.SetPowerPells();
+		}
+		loopCount++;
+	}
+	/* Pause gameState */
+	else{
+		if(countDown <= 0){
+			// counting down
+			t0 = time(NULL);
+		}
+		else{
+			t = time(NULL);
+			countDown -= (t - t0);
+			t0 = time(NULL);
+		}
+	}
+	
+}
+
+void Play::PlayBackgroundMusic(){
+	musicPlayer.PlayBackground(scene);
+}
+
 void Play::Restart(){
+	musicPlayer.KeepPlaying();
 	maze.Restart();
 	t0 = time(NULL);
 	timeLeft = timeMax;
@@ -81,8 +194,12 @@ void Play::Restart(){
 	lives = 3;
 	pause = false;
 	countDown = 3;
-	loopCount = 3;
+	loopCount = 0;
 	exchangePlayers = false;
+
+	/* Play start music */
+	musicPlayer.Stop(areyouready);
+	musicPlayer.PlayOneShot(areyouready);
 }
 
 void Play::SendMazeCommand(int key){
@@ -151,8 +268,54 @@ void Play::SendMazeCommand(int key){
 
 }
 
-void Play::DrawMaze(){
+void Play::Draw2DMaze(){
 	maze.Draw();
+}
+
+void Play::Draw3DMaze(){
+
+	Update3DMaze();	
+
+	int ghostNow = maze.ReturnGhostControl();
+	
+	/* Store the window size */	
+	int wid,hei;
+	FsGetWindowSize(wid,hei);
+
+	/* Plot the pacman camera view */	
+	pacView.CameraFollow(pacInfo.surface, pacInfo.x, pacInfo.y);
+	if(exchangePlayers == false){
+		glViewport(wid/4,0, wid, hei);
+	}
+	else{
+		glViewport(-wid/4,0,wid,hei);
+	}
+	pacView.SetView();
+	maze_3d.Draw();
+	
+	/* Plot the ghost camera view */
+	ghostView.CameraFollow(ghostInfo[ghostNow].surface, ghostInfo[ghostNow].x, 
+								ghostInfo[ghostNow].y);
+	if(exchangePlayers == false){
+		glViewport(-wid/4,0,wid,hei);
+	}
+	else{
+		glViewport(wid/4,0,wid,hei);
+	}
+	ghostView.SetView();
+	maze_3d.Draw();
+
+	/* Reset 2D to display other 2D objects */
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glDisable(GL_DEPTH_TEST);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, (float)wid-1, (float)hei-1, 0, -1, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glDisable(GL_DEPTH_TEST);
+	glViewport(0, 0, wid, hei);
 }
 
 /* Draw the countdown page */
@@ -227,42 +390,14 @@ void Play::Draw(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	DrawBackground();
 	DrawGameInfo();
+	if(plot3d == true) Draw3DMaze();
+	else Draw2DMaze();
 	if(countDown > 0){
 		DrawCountDown();
 	}
-	maze.Draw();
 }
 
-
-
-class Play3D : public Play{
-private:
-
-	FullMaze_3D maze_3d;
-	View ghostView, pacView;
-	
-	int ***mazeArray;
-	PacMan pacInfo;
-	vector<Ghost> ghostInfo;
-	void DrawMaze();
-public:
-	Play3D();
-	void Draw();
-	void Update3DMaze();
-
-};
-
-Play3D::Play3D(){
-	mazeArray = new int**[6];
-	for(int i = 0;i < 6;i++){
-		mazeArray[i] = new int*[blockNumber];
-		for(int j = 0;j < blockNumber;j++){
-			mazeArray[i][j] = new int[blockNumber];
-		}
-	}
-}
-
-void Play3D::Update3DMaze(){
+void Play::Update3DMaze(){
 	maze.ReturnMaze(mazeArray);
 	maze.ReturnPacman(&pacInfo);
 	maze.ReturnGhost(&ghostInfo);
@@ -272,55 +407,6 @@ void Play3D::Update3DMaze(){
 	maze_3d.SetGhost(&ghostInfo);
 }
 
-void Play3D::DrawMaze(){
-	
-	int ghostNow = maze.ReturnGhostControl();
-	
-	/* Store the window size */	
-	int wid,hei;
-	FsGetWindowSize(wid,hei);
-
-	/* Plot the pacman camera view */	
-	pacView.CameraFollow(pacInfo.surface, pacInfo.x, pacInfo.y);
-	if(exchangePlayers == false){
-		glViewport(wid/4,0, wid, hei);
-	}
-	else{
-		glViewport(-wid/4,0,wid,hei);
-	}
-	pacView.SetView();
-	maze_3d.Draw();
-	
-	/* Plot the ghost camera view */
-	ghostView.CameraFollow(ghostInfo[ghostNow].surface, ghostInfo[ghostNow].x, 
-								ghostInfo[ghostNow].y);
-	if(exchangePlayers == false){
-		glViewport(-wid/4,0,wid,hei);
-	}
-	else{
-		glViewport(wid/4,0,wid,hei);
-	}
-	ghostView.SetView();
-	maze_3d.Draw();
-
-	/* Reset 2D to display other 2D objects */
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glDisable(GL_DEPTH_TEST);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, (float)wid-1, (float)hei-1, 0, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glDisable(GL_DEPTH_TEST);
-	glViewport(0, 0, wid, hei);
-}
-
-void Play3D::Draw(){
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	DrawBackground();
-	DrawGameInfo();
-}
 
 
 #endif
