@@ -625,24 +625,24 @@ void FullMaze::Restart(){
 
 
 void FullMaze::ChangeIndexToDir(int i) {
-	switch (ghost[i].dirIndex) {
-	case 0:
-		ghost[i].xdir = 1;
-		ghost[i].ydir = 0;
-		break;
-	case 1:
-		ghost[i].xdir = 0;
-		ghost[i].ydir = -1;
-		break;
-	case 2:
-		ghost[i].xdir = -1;
-		ghost[i].ydir = 0;
-		break;
-	case 3:
-		ghost[i].xdir = 0;
-		ghost[i].ydir = 1;
-		break;
-	}
+    switch (ghost[i].dirIndex) {
+    case 0:
+        ghost[i].xdir = 1;
+        ghost[i].ydir = 0;
+        break;
+    case 1:
+        ghost[i].xdir = 0;
+        ghost[i].ydir = -1;
+        break;
+    case 2:
+        ghost[i].xdir = -1;
+        ghost[i].ydir = 0;
+        break;
+    case 3:
+        ghost[i].xdir = 0;
+        ghost[i].ydir = 1;
+        break;
+    }
 }
 
 
@@ -655,23 +655,23 @@ int FullMaze::ReturnPerls(){
 }
 
 void FullMaze::GhostChase(int index, int x, int y) {
-	int distx = abs(x - ghost[index].x);
-	int disty = abs(y - ghost[index].y);
-	int prevx = ghost[index].x;
-	int prevy = ghost[index].y;
+    int distx = abs(x - ghost[index].x);
+    int disty = abs(y - ghost[index].y);
+    int prevx = ghost[index].x;
+    int prevy = ghost[index].y;
 
-	if (distx < disty) {
-		if (x > prevx) {
-			ghost[index].dirIndex = 0;
-		}
-		else { ghost[index].dirIndex = 2; }
-	}
-	else {
-		if (y > prevy) {
-			ghost[index].dirIndex = 3;
-		}
-		else { ghost[index].dirIndex = 1; }
-	}
+    if (distx < disty) {
+        if (x > prevx) {
+            ghost[index].dirIndex = 0;
+        }
+        else { ghost[index].dirIndex = 2; }
+    }
+    else {
+        if (y > prevy) {
+            ghost[index].dirIndex = 3;
+        }
+        else { ghost[index].dirIndex = 1; }
+    }
 }
 void FullMaze::SetCherry(){
   for(int i = 0;i < 6;i++){
@@ -866,15 +866,15 @@ bool FullMaze::CollisionDetect(){
 
 void FullMaze::SwitchGhost(int index){
   //ghostControl = index % ghostLives;
-	std:vector<int> tmp;
-	int n = ghost.size();
-	for (int i = 0;i < n;i++) {
-		if (ghost[i].surface == pacman.surface){
-			tmp.push_back(i);
-		}
-	}
-	n = tmp.size();
-	if(n != 0){
+    vector<int> tmp;
+    int n = ghost.size();
+    for (int i = 0;i < n;i++) {
+        if (ghost[i].surface == pacman.surface){
+            tmp.push_back(i);
+        }
+    }
+    n = tmp.size();
+    if(n != 0){
     ghostControl = tmp[rand() % n];
   }
   else{
@@ -972,7 +972,7 @@ void FullMaze::SetMaze(){
   for(int i = 0;i < 6;i++){
     for(int j = 0;j < blockNumber;j++){
       for(int k = 0;k < blockNumber;k++){
-        maze[i].SetMaze(k,j,inputMaze[625*i + 25*j+k] - '0');
+        maze[i].SetMaze(k, j, inputMaze[625*i + 25*j+k] - '0');
       }
     }
   }
@@ -1036,6 +1036,9 @@ void FullMaze::ChangeDirection(int dir){
       pacman.xdir = 0;
       pacman.ydir = 1;
       break;
+    default:
+      // do nothing if unknown command */
+      break;
   }
 }
 
@@ -1056,6 +1059,9 @@ void FullMaze::ChangeGhostDirection(int dir){
     case 4:
       ghost[ghostControl].xdir = 0;
       ghost[ghostControl].ydir = 1;
+      break;
+    default:
+      /* do nothing if unknown command */
       break;
   }
 }
@@ -1240,362 +1246,362 @@ void FullMaze::GhostMove(){
 */
 
 void FullMaze::GhostMove(int loopCount) {
-	int n = ghost.size();
-	int prevX, prevY, prevSurface;
-	for (int i = 0;i < n;i++) {
-		prevSurface = ghost[i].surface;
-		ghost[i].prevX = ghost[i].x;
-		ghost[i].prevY = ghost[i].y;
-		prevX = ghost[i].x;
-		prevY = ghost[i].y;
-		if (i != ghostControl){
-		  if((loopCount*3) % 4== 0){
-        continue;
+    int n = ghost.size();
+    int prevX, prevY, prevSurface;
+    for (int i = 0;i < n;i++) {
+        prevSurface = ghost[i].surface;
+        ghost[i].prevX = ghost[i].x;
+        ghost[i].prevY = ghost[i].y;
+        prevX = ghost[i].x;
+        prevY = ghost[i].y;
+        if (i != ghostControl){
+          if((loopCount*3) % 4== 0){
+            continue;
       }
-			switch (ghost[i].dirIndex)
-			{
-			case 0: //right
-				if (maze[prevSurface].ReturnElement(prevX, prevY - 1) != 1 && maze[prevSurface].ReturnElement(prevX, prevY + 1) != 1)
-				{
-					if (ghost[i].mode == 1) {
-						int tmp[] = { 0, 1, 3 };
-						ghost[i].dirIndex = tmp[rand() % 3];
-					}
-					else { if (pacman.y < ghost[i].y) { ghost[i].dirIndex = 1; }
-					else if (pacman.y > ghost[i].y) { ghost[i].dirIndex = 3; }
-					else { ghost[i].dirIndex = 0; }
-					}
+            switch (ghost[i].dirIndex)
+            {
+            case 0: //right
+                if (maze[prevSurface].ReturnElement(prevX, prevY - 1) != 1 && maze[prevSurface].ReturnElement(prevX, prevY + 1) != 1)
+                {
+                    if (ghost[i].mode == 1) {
+                        int tmp[] = { 0, 1, 3 };
+                        ghost[i].dirIndex = tmp[rand() % 3];
+                    }
+                    else { if (pacman.y < ghost[i].y) { ghost[i].dirIndex = 1; }
+                    else if (pacman.y > ghost[i].y) { ghost[i].dirIndex = 3; }
+                    else { ghost[i].dirIndex = 0; }
+                    }
 
-				}
-				else if (maze[prevSurface].ReturnElement(prevX, prevY - 1) != 1 && maze[prevSurface].ReturnElement(prevX, prevY + 1) == 1)
-				{
-					if (ghost[i].mode == 1) {
-						int tmp[] = { 0, 1 };
-						ghost[i].dirIndex = tmp[rand() % 2];
-					}
-					else {
-						if (pacman.y < ghost[i].y) { ghost[i].dirIndex = 1; }
-					}
-				}
-				else if (maze[prevSurface].ReturnElement(prevX, prevY - 1) == 1 && maze[prevSurface].ReturnElement(prevX, prevY + 1) != 1)
-				{
-					if (ghost[i].mode == 1) {
-						int tmp[] = { 0, 3 };
-						ghost[i].dirIndex = tmp[rand() % 2];
-					}
-					else { if (pacman.y > ghost[i].y) { ghost[i].dirIndex = 3; } }
-				}
-				break;
-			case 1: //up
-				if (maze[prevSurface].ReturnElement(prevX + 1, prevY) != 1 && maze[prevSurface].ReturnElement(prevX - 1, prevY) != 1)
-				{
-					if (ghost[i].mode == 1) {
-						int tmp[] = { 0, 1, 2 };
-						ghost[i].dirIndex = tmp[rand() % 3];
-					}
-					else {
-						if (pacman.x > ghost[i].x) { ghost[i].dirIndex = 0; }
-						else if (pacman.x < ghost[i].x) { ghost[i].dirIndex = 2; }
-						else { ghost[i].dirIndex = 1; }
-					}
-				}
-				else if (maze[prevSurface].ReturnElement(prevX + 1, prevY) != 1 && maze[prevSurface].ReturnElement(prevX - 1, prevY) == 1)
-				{
-					if (ghost[i].mode == 1) {
-						int tmp[] = { 0, 1 };
-						ghost[i].dirIndex = tmp[rand() % 2];
-					}
-					else {
-						if (pacman.x > ghost[i].x) { ghost[i].dirIndex = 0; }
-						else { ghost[i].dirIndex = 1; }
-					}
-				}
-				else if (maze[prevSurface].ReturnElement(prevX + 1, prevY) == 1 && maze[prevSurface].ReturnElement(prevX - 1, prevY) != 1)
-				{
-					if (ghost[i].mode==1) {
-						int tmp[] = { 1, 2 };
-						ghost[i].dirIndex = tmp[rand() % 2];
-					}
-					else {
-						if (pacman.x < ghost[i].x) { ghost[i].dirIndex = 2; }
-						else { ghost[i].dirIndex = 1; }
-						}
-				}
-				break;
-			case 2: //left
-				if (maze[prevSurface].ReturnElement(prevX, prevY - 1) != 1 && maze[prevSurface].ReturnElement(prevX, prevY + 1) != 1)
-				{
-					if (ghost[i].mode == 1) {
-						int tmp[] = { 1, 2, 3 };
-						ghost[i].dirIndex = tmp[rand() % 3];
-					}
-					else {
-						if (pacman.y < ghost[i].y) { ghost[i].dirIndex = 1; }
-						else if (pacman.y > ghost[i].y) { ghost[i].dirIndex = 3; }
-						else { ghost[i].dirIndex = 2; }
-					}
-				}
-				else if (maze[prevSurface].ReturnElement(prevX, prevY - 1) != 1 && maze[prevSurface].ReturnElement(prevX, prevY + 1) == 1)
-				{
-					if (ghost[i].mode==1) {
-						int tmp[] = { 1, 2 };
-						ghost[i].dirIndex = tmp[rand() % 2];
-					}
-					else { if (pacman.y < ghost[i].y) { ghost[i].dirIndex = 1; }
-					else { ghost[i].dirIndex = 2; }
-					}
-				}
-				else if (maze[prevSurface].ReturnElement(prevX, prevY - 1) == 1 && maze[prevSurface].ReturnElement(prevX, prevY + 1) != 1)
-				{
-					if (ghost[i].mode == 1) {
-						int tmp[] = { 2, 3 };
-						ghost[i].dirIndex = tmp[rand() % 2];
-					}
-					else {
-						if (pacman.y > ghost[i].y) { ghost[i].dirIndex = 3; }
-						else { ghost[i].dirIndex = 2; }
-					}
-				}
-				break;
-			case 3: //down
-				if (maze[prevSurface].ReturnElement(prevX + 1, prevY) != 1 && maze[prevSurface].ReturnElement(prevX - 1, prevY) != 1)
-				{
-					if (ghost[i].mode == 1) {
-						int tmp[] = { 0, 2, 3 };
-						ghost[i].dirIndex = tmp[rand() % 3];
-					}
-					else {
-						if (pacman.x > ghost[i].x) { ghost[i].dirIndex = 0; }
-						else if (pacman.x < ghost[i].x) { ghost[i].dirIndex = 2; }
-						else { ghost[i].dirIndex = 3; }
-					}
-				}
-				else if (maze[prevSurface].ReturnElement(prevX + 1, prevY) != 1 && maze[prevSurface].ReturnElement(prevX - 1, prevY) == 1)
-				{
-					if (ghost[i].mode == 1) {
-						int tmp[] = { 0, 3 };
-						ghost[i].dirIndex = tmp[rand() % 2];
-					}
-					else {
-						if (pacman.x > ghost[i].x) { ghost[i].dirIndex = 0; }
-						else { ghost[i].dirIndex = 3; }
-					}
-				}
-				else if (maze[prevSurface].ReturnElement(prevX + 1, prevY) == 1 && maze[prevSurface].ReturnElement(prevX - 1, prevY) != 1)
-				{
-					if (ghost[i].mode == 1) {
-						int tmp[] = { 3, 2 };
-						ghost[i].dirIndex = tmp[rand() % 2];
-					}
-					else {
-						if (pacman.x < ghost[i].x) { ghost[i].dirIndex = 2; }
-						else { ghost[i].dirIndex = 3; }
-					}
-				}
-				break;
-			}
+                }
+                else if (maze[prevSurface].ReturnElement(prevX, prevY - 1) != 1 && maze[prevSurface].ReturnElement(prevX, prevY + 1) == 1)
+                {
+                    if (ghost[i].mode == 1) {
+                        int tmp[] = { 0, 1 };
+                        ghost[i].dirIndex = tmp[rand() % 2];
+                    }
+                    else {
+                        if (pacman.y < ghost[i].y) { ghost[i].dirIndex = 1; }
+                    }
+                }
+                else if (maze[prevSurface].ReturnElement(prevX, prevY - 1) == 1 && maze[prevSurface].ReturnElement(prevX, prevY + 1) != 1)
+                {
+                    if (ghost[i].mode == 1) {
+                        int tmp[] = { 0, 3 };
+                        ghost[i].dirIndex = tmp[rand() % 2];
+                    }
+                    else { if (pacman.y > ghost[i].y) { ghost[i].dirIndex = 3; } }
+                }
+                break;
+            case 1: //up
+                if (maze[prevSurface].ReturnElement(prevX + 1, prevY) != 1 && maze[prevSurface].ReturnElement(prevX - 1, prevY) != 1)
+                {
+                    if (ghost[i].mode == 1) {
+                        int tmp[] = { 0, 1, 2 };
+                        ghost[i].dirIndex = tmp[rand() % 3];
+                    }
+                    else {
+                        if (pacman.x > ghost[i].x) { ghost[i].dirIndex = 0; }
+                        else if (pacman.x < ghost[i].x) { ghost[i].dirIndex = 2; }
+                        else { ghost[i].dirIndex = 1; }
+                    }
+                }
+                else if (maze[prevSurface].ReturnElement(prevX + 1, prevY) != 1 && maze[prevSurface].ReturnElement(prevX - 1, prevY) == 1)
+                {
+                    if (ghost[i].mode == 1) {
+                        int tmp[] = { 0, 1 };
+                        ghost[i].dirIndex = tmp[rand() % 2];
+                    }
+                    else {
+                        if (pacman.x > ghost[i].x) { ghost[i].dirIndex = 0; }
+                        else { ghost[i].dirIndex = 1; }
+                    }
+                }
+                else if (maze[prevSurface].ReturnElement(prevX + 1, prevY) == 1 && maze[prevSurface].ReturnElement(prevX - 1, prevY) != 1)
+                {
+                    if (ghost[i].mode==1) {
+                        int tmp[] = { 1, 2 };
+                        ghost[i].dirIndex = tmp[rand() % 2];
+                    }
+                    else {
+                        if (pacman.x < ghost[i].x) { ghost[i].dirIndex = 2; }
+                        else { ghost[i].dirIndex = 1; }
+                        }
+                }
+                break;
+            case 2: //left
+                if (maze[prevSurface].ReturnElement(prevX, prevY - 1) != 1 && maze[prevSurface].ReturnElement(prevX, prevY + 1) != 1)
+                {
+                    if (ghost[i].mode == 1) {
+                        int tmp[] = { 1, 2, 3 };
+                        ghost[i].dirIndex = tmp[rand() % 3];
+                    }
+                    else {
+                        if (pacman.y < ghost[i].y) { ghost[i].dirIndex = 1; }
+                        else if (pacman.y > ghost[i].y) { ghost[i].dirIndex = 3; }
+                        else { ghost[i].dirIndex = 2; }
+                    }
+                }
+                else if (maze[prevSurface].ReturnElement(prevX, prevY - 1) != 1 && maze[prevSurface].ReturnElement(prevX, prevY + 1) == 1)
+                {
+                    if (ghost[i].mode==1) {
+                        int tmp[] = { 1, 2 };
+                        ghost[i].dirIndex = tmp[rand() % 2];
+                    }
+                    else { if (pacman.y < ghost[i].y) { ghost[i].dirIndex = 1; }
+                    else { ghost[i].dirIndex = 2; }
+                    }
+                }
+                else if (maze[prevSurface].ReturnElement(prevX, prevY - 1) == 1 && maze[prevSurface].ReturnElement(prevX, prevY + 1) != 1)
+                {
+                    if (ghost[i].mode == 1) {
+                        int tmp[] = { 2, 3 };
+                        ghost[i].dirIndex = tmp[rand() % 2];
+                    }
+                    else {
+                        if (pacman.y > ghost[i].y) { ghost[i].dirIndex = 3; }
+                        else { ghost[i].dirIndex = 2; }
+                    }
+                }
+                break;
+            case 3: //down
+                if (maze[prevSurface].ReturnElement(prevX + 1, prevY) != 1 && maze[prevSurface].ReturnElement(prevX - 1, prevY) != 1)
+                {
+                    if (ghost[i].mode == 1) {
+                        int tmp[] = { 0, 2, 3 };
+                        ghost[i].dirIndex = tmp[rand() % 3];
+                    }
+                    else {
+                        if (pacman.x > ghost[i].x) { ghost[i].dirIndex = 0; }
+                        else if (pacman.x < ghost[i].x) { ghost[i].dirIndex = 2; }
+                        else { ghost[i].dirIndex = 3; }
+                    }
+                }
+                else if (maze[prevSurface].ReturnElement(prevX + 1, prevY) != 1 && maze[prevSurface].ReturnElement(prevX - 1, prevY) == 1)
+                {
+                    if (ghost[i].mode == 1) {
+                        int tmp[] = { 0, 3 };
+                        ghost[i].dirIndex = tmp[rand() % 2];
+                    }
+                    else {
+                        if (pacman.x > ghost[i].x) { ghost[i].dirIndex = 0; }
+                        else { ghost[i].dirIndex = 3; }
+                    }
+                }
+                else if (maze[prevSurface].ReturnElement(prevX + 1, prevY) == 1 && maze[prevSurface].ReturnElement(prevX - 1, prevY) != 1)
+                {
+                    if (ghost[i].mode == 1) {
+                        int tmp[] = { 3, 2 };
+                        ghost[i].dirIndex = tmp[rand() % 2];
+                    }
+                    else {
+                        if (pacman.x < ghost[i].x) { ghost[i].dirIndex = 2; }
+                        else { ghost[i].dirIndex = 3; }
+                    }
+                }
+                break;
+            }
       ChangeIndexToDir(i);
-		}
+        }
 
 
-		if (ghost[i].xdir < 0) {
-			ghost[i].x--;
-			if (ghost[i].x < 0) {
-				switch (ghost[i].surface) {
-				case 0:
-					ghost[i].surface = 2;
-					ghost[i].x = ghost[i].y;
-					ghost[i].y = 0;
-					ghost[i].xdir = 0;
-					ghost[i].ydir = 1;
-					ghost[i].dirIndex = 3;
-					break;
-				case 1:
-					ghost[i].surface = 4;
-					ghost[i].x = blockNumber - 1;
-					break;
-				case 2:
-					ghost[i].surface = 1;
-					ghost[i].x = blockNumber - 1;
-					break;
-				case 3:
-					ghost[i].surface = 2;
-					ghost[i].x = blockNumber - 1;
-					break;
-				case 4:
-					ghost[i].surface = 3;
-					ghost[i].x = blockNumber - 1;
-					break;
-				case 5:
-					ghost[i].surface = 2;
-					ghost[i].x = blockNumber - 1 - ghost[i].y;
-					ghost[i].y = blockNumber - 1;
-					ghost[i].xdir = 0;
-					ghost[i].ydir = -1;
-					ghost[i].dirIndex = 1;
-					break;
-				}
-			}
-		}
-		else if (ghost[i].ydir < 0) {
-			ghost[i].y--;
-			if (ghost[i].y < 0) {
-				switch (ghost[i].surface) {
-				case 0:
-					ghost[i].surface = 1;
-					ghost[i].x = blockNumber - 1 - ghost[i].x;
-					ghost[i].y = 0;
-					ghost[i].ydir = 1;
-					ghost[i].dirIndex = 3;
-					break;
-				case 1:
-					ghost[i].surface = 0;
-					ghost[i].x = blockNumber - 1 - ghost[i].x;
-					ghost[i].y = 0;
-					ghost[i].ydir = 1;
-					ghost[i].dirIndex = 3;
-					break;
-				case 2:
-					ghost[i].surface = 0;
-					ghost[i].y = ghost[i].x;
-					ghost[i].x = 0;
-					ghost[i].ydir = 0;
-					ghost[i].xdir = 1;
-					ghost[i].dirIndex = 0;
-					break;
-				case 3:
-					ghost[i].surface = 0;
-					ghost[i].y = blockNumber - 1;
-					break;
-				case 4:
-					ghost[i].surface = 0;
-					ghost[i].y = blockNumber - 1 - ghost[i].x;
-					ghost[i].x = blockNumber - 1;
-					ghost[i].xdir = -1;
-					ghost[i].ydir = 0;
-					ghost[i].dirIndex = 2;
-					break;
-				case 5:
-					ghost[i].surface = 3;
-					ghost[i].y = blockNumber - 1;
-					break;
-				}
-			}
-		}
-		else if (ghost[i].xdir > 0) {
-			ghost[i].x++;
-			if (ghost[i].x >= blockNumber) {
-				switch (ghost[i].surface) {
-				case 0:
-					ghost[i].surface = 4;
-					ghost[i].x = blockNumber - 1 - ghost[i].y;
-					ghost[i].y = 0;
-					ghost[i].xdir = 0;
-					ghost[i].ydir = 1;
-					ghost[i].dirIndex = 3;
-					break;
-				case 1:
-					ghost[i].surface = 2;
-					ghost[i].x = 0;
-					break;
-				case 2:
-					ghost[i].surface = 3;
-					ghost[i].x = 0;
-					break;
-				case 3:
-					ghost[i].surface = 4;
-					ghost[i].x = 0;
-					break;
-				case 4:
-					ghost[i].surface = 1;
-					ghost[i].x = 0;
-					break;
-				case 5:
-					ghost[i].surface = 4;
-					ghost[i].x = ghost[i].y;
-					ghost[i].y = blockNumber - 1;
-					ghost[i].xdir = 0;
-					ghost[i].ydir = -1;
-					ghost[i].dirIndex = 1;
-					break;
-				}
-			}
-		}
-		else if (ghost[i].ydir > 0) {
-			ghost[i].y++;
-			if (ghost[i].y >= blockNumber) {
-				switch (ghost[i].surface) {
-				case 0:
-					ghost[i].surface = 3;
-					ghost[i].y = 0;
-					break;
-				case 1:
-					ghost[i].surface = 5;
-					ghost[i].x = blockNumber - 1 - ghost[i].x;
-					ghost[i].y = blockNumber - 1;
-					ghost[i].ydir = -1;
-					ghost[i].dirIndex = 1;
-					break;
-				case 2:
-					ghost[i].surface = 5;
-					ghost[i].y = blockNumber - 1 - ghost[i].x;
-					ghost[i].x = 0;
-					ghost[i].xdir = 1;
-					ghost[i].ydir = 0;
-					ghost[i].dirIndex = 0;
-					break;
-				case 3:
-					ghost[i].surface = 5;
-					ghost[i].y = 0;
-					break;
-				case 4:
-					ghost[i].surface = 5;
-					ghost[i].y = ghost[i].x;
-					ghost[i].x = blockNumber - 1;
-					ghost[i].ydir = 0;
-					ghost[i].xdir = -1;
-					ghost[i].dirIndex = 2;
-					break;
-				case 5:
-					ghost[i].surface = 1;
-					ghost[i].x = blockNumber - 1 - ghost[i].x;
-					ghost[i].y = blockNumber - 1;
-					ghost[i].ydir = -1;
-					ghost[i].dirIndex = 1;
-					break;
-				}
-			}
-		}
-		int x = ghost[i].x;
-		int y = ghost[i].y;
-		int surface = ghost[i].surface;
-		if (maze[surface].ReturnElement(x, y) == 1) {
-			ghost[i].x = prevX;
-			ghost[i].y = prevY;
-			ghost[i].surface = prevSurface;
-			if (ghost[i].surface == pacman.surface)
-			{ ghost[i].mode = 2; }
-			else { ghost[i].mode = 1; }
-			if (ghost[i].x >= 11 && ghost[i].x <= 13 && ghost[i].y >= 10 && ghost[i].y <= 12) { ghost[i].mode = 1; }
-			if (i != ghostControl) {
-				switch (ghost[i].mode)
-				{
-				case 1:
-					RandomDirection(i);
-					break;
-				case 2 :
-				  if(pacman.powerState != true){
+        if (ghost[i].xdir < 0) {
+            ghost[i].x--;
+            if (ghost[i].x < 0) {
+                switch (ghost[i].surface) {
+                case 0:
+                    ghost[i].surface = 2;
+                    ghost[i].x = ghost[i].y;
+                    ghost[i].y = 0;
+                    ghost[i].xdir = 0;
+                    ghost[i].ydir = 1;
+                    ghost[i].dirIndex = 3;
+                    break;
+                case 1:
+                    ghost[i].surface = 4;
+                    ghost[i].x = blockNumber - 1;
+                    break;
+                case 2:
+                    ghost[i].surface = 1;
+                    ghost[i].x = blockNumber - 1;
+                    break;
+                case 3:
+                    ghost[i].surface = 2;
+                    ghost[i].x = blockNumber - 1;
+                    break;
+                case 4:
+                    ghost[i].surface = 3;
+                    ghost[i].x = blockNumber - 1;
+                    break;
+                case 5:
+                    ghost[i].surface = 2;
+                    ghost[i].x = blockNumber - 1 - ghost[i].y;
+                    ghost[i].y = blockNumber - 1;
+                    ghost[i].xdir = 0;
+                    ghost[i].ydir = -1;
+                    ghost[i].dirIndex = 1;
+                    break;
+                }
+            }
+        }
+        else if (ghost[i].ydir < 0) {
+            ghost[i].y--;
+            if (ghost[i].y < 0) {
+                switch (ghost[i].surface) {
+                case 0:
+                    ghost[i].surface = 1;
+                    ghost[i].x = blockNumber - 1 - ghost[i].x;
+                    ghost[i].y = 0;
+                    ghost[i].ydir = 1;
+                    ghost[i].dirIndex = 3;
+                    break;
+                case 1:
+                    ghost[i].surface = 0;
+                    ghost[i].x = blockNumber - 1 - ghost[i].x;
+                    ghost[i].y = 0;
+                    ghost[i].ydir = 1;
+                    ghost[i].dirIndex = 3;
+                    break;
+                case 2:
+                    ghost[i].surface = 0;
+                    ghost[i].y = ghost[i].x;
+                    ghost[i].x = 0;
+                    ghost[i].ydir = 0;
+                    ghost[i].xdir = 1;
+                    ghost[i].dirIndex = 0;
+                    break;
+                case 3:
+                    ghost[i].surface = 0;
+                    ghost[i].y = blockNumber - 1;
+                    break;
+                case 4:
+                    ghost[i].surface = 0;
+                    ghost[i].y = blockNumber - 1 - ghost[i].x;
+                    ghost[i].x = blockNumber - 1;
+                    ghost[i].xdir = -1;
+                    ghost[i].ydir = 0;
+                    ghost[i].dirIndex = 2;
+                    break;
+                case 5:
+                    ghost[i].surface = 3;
+                    ghost[i].y = blockNumber - 1;
+                    break;
+                }
+            }
+        }
+        else if (ghost[i].xdir > 0) {
+            ghost[i].x++;
+            if (ghost[i].x >= blockNumber) {
+                switch (ghost[i].surface) {
+                case 0:
+                    ghost[i].surface = 4;
+                    ghost[i].x = blockNumber - 1 - ghost[i].y;
+                    ghost[i].y = 0;
+                    ghost[i].xdir = 0;
+                    ghost[i].ydir = 1;
+                    ghost[i].dirIndex = 3;
+                    break;
+                case 1:
+                    ghost[i].surface = 2;
+                    ghost[i].x = 0;
+                    break;
+                case 2:
+                    ghost[i].surface = 3;
+                    ghost[i].x = 0;
+                    break;
+                case 3:
+                    ghost[i].surface = 4;
+                    ghost[i].x = 0;
+                    break;
+                case 4:
+                    ghost[i].surface = 1;
+                    ghost[i].x = 0;
+                    break;
+                case 5:
+                    ghost[i].surface = 4;
+                    ghost[i].x = ghost[i].y;
+                    ghost[i].y = blockNumber - 1;
+                    ghost[i].xdir = 0;
+                    ghost[i].ydir = -1;
+                    ghost[i].dirIndex = 1;
+                    break;
+                }
+            }
+        }
+        else if (ghost[i].ydir > 0) {
+            ghost[i].y++;
+            if (ghost[i].y >= blockNumber) {
+                switch (ghost[i].surface) {
+                case 0:
+                    ghost[i].surface = 3;
+                    ghost[i].y = 0;
+                    break;
+                case 1:
+                    ghost[i].surface = 5;
+                    ghost[i].x = blockNumber - 1 - ghost[i].x;
+                    ghost[i].y = blockNumber - 1;
+                    ghost[i].ydir = -1;
+                    ghost[i].dirIndex = 1;
+                    break;
+                case 2:
+                    ghost[i].surface = 5;
+                    ghost[i].y = blockNumber - 1 - ghost[i].x;
+                    ghost[i].x = 0;
+                    ghost[i].xdir = 1;
+                    ghost[i].ydir = 0;
+                    ghost[i].dirIndex = 0;
+                    break;
+                case 3:
+                    ghost[i].surface = 5;
+                    ghost[i].y = 0;
+                    break;
+                case 4:
+                    ghost[i].surface = 5;
+                    ghost[i].y = ghost[i].x;
+                    ghost[i].x = blockNumber - 1;
+                    ghost[i].ydir = 0;
+                    ghost[i].xdir = -1;
+                    ghost[i].dirIndex = 2;
+                    break;
+                case 5:
+                    ghost[i].surface = 1;
+                    ghost[i].x = blockNumber - 1 - ghost[i].x;
+                    ghost[i].y = blockNumber - 1;
+                    ghost[i].ydir = -1;
+                    ghost[i].dirIndex = 1;
+                    break;
+                }
+            }
+        }
+        int x = ghost[i].x;
+        int y = ghost[i].y;
+        int surface = ghost[i].surface;
+        if (maze[surface].ReturnElement(x, y) == 1) {
+            ghost[i].x = prevX;
+            ghost[i].y = prevY;
+            ghost[i].surface = prevSurface;
+            if (ghost[i].surface == pacman.surface)
+            { ghost[i].mode = 2; }
+            else { ghost[i].mode = 1; }
+            if (ghost[i].x >= 11 && ghost[i].x <= 13 && ghost[i].y >= 10 && ghost[i].y <= 12) { ghost[i].mode = 1; }
+            if (i != ghostControl) {
+                switch (ghost[i].mode)
+                {
+                case 1:
+                    RandomDirection(i);
+                    break;
+                case 2 :
+                  if(pacman.powerState != true){
             GhostChase(i, pacman.x, pacman.y);
           }
           else{
             RandomDirection(i);
           }
-				  break;
-				}
+                  break;
+                }
 
-			}
-		}
-	}
+            }
+        }
+    }
 }
 
 void FullMaze::Move(){

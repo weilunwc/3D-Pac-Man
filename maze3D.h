@@ -1,3 +1,5 @@
+#ifndef MAZE3D_H
+#define MAZE3D_H
 
 extern int blockSize_3D; // Giada's Modification
 extern const int blockNumber;
@@ -24,110 +26,7 @@ typedef struct ColorStruct{
   int b;
 }Color;
 */
-class CameraObject
-{
-public:
-    double x,y,z;
-    double h,p,b;
 
-    double fov,nearZ,farZ;
-
-    CameraObject();
-    void Initialize(void);
-    void SetUpCameraProjection(void);
-    void SetUpCameraTransformation(void);
-
-    void GetForwardVector(double &vx,double &vy,double &vz);
-};
-
-CameraObject::CameraObject()
-{
-    Initialize();
-}
-
-void CameraObject::Initialize(void)
-{
-    x=0;
-    y=0;
-    z=0;
-    h=0;
-    p=0;
-    b=0;
-
-    fov=myPi/6.0;  // 30 degree
-    nearZ=0.1;
-    farZ=1000;
-}
-
-void CameraObject::SetUpCameraProjection(void)
-{
-    int wid,hei;
-    double aspect;
-
-    FsGetWindowSize(wid,hei);
-    aspect=(double)wid/(double)hei;
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(fov*180.0/myPi,aspect,nearZ,farZ);
-}
-
-void CameraObject::SetUpCameraTransformation(void)
-{
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glRotated(-b*180.0/myPi,0.0,0.0,1.0);
-    glRotated(-p*180.0/myPi,1.0,0.0,0.0);
-    glRotated(-h*180.0/myPi,0.0,1.0,0.0);
-    glTranslated(-x,-y,-z);
-}
-
-void CameraObject::GetForwardVector(double &vx,double &vy,double &vz)
-{
-    vx=-cos(p)*sin(h);
-    vy= sin(p);
-    vz=-cos(p)*cos(h);
-}
-
-class OrbitingViewer
-{
-public:
-    double h,p;
-    double dist;
-    double focusX,focusY,focusZ;
-
-    OrbitingViewer();
-    void Initialize(void);
-    void SetUpCamera(CameraObject &camera);
-};
-
-OrbitingViewer::OrbitingViewer()
-{
-    Initialize();
-}
-
-void OrbitingViewer::Initialize(void)
-{
-    h=0;
-    p=0;
-    dist=500.0;
-    focusX=0.0;
-    focusY=0.0;
-    focusZ=0.0;
-}
-
-void OrbitingViewer::SetUpCamera(CameraObject &camera)
-{
-    camera.h=h;
-    camera.p=p;
-    camera.b=0.0;
-
-    double vx,vy,vz;
-    camera.GetForwardVector(vx,vy,vz);
-    camera.x=focusX-vx*dist;
-    camera.y=focusY-vy*dist;
-    camera.z=focusZ-vz*dist;
-}
 class Maze_3D{
   protected:
     int **maze;
@@ -903,3 +802,5 @@ void FullMaze_3D::Print(){
     maze[i].Print();
   }
 }
+
+#endif
