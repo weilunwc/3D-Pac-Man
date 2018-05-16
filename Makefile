@@ -10,6 +10,9 @@ All:  main.cpp
 	$(MKFLAGS) exe.app/Contents/MacOS
 	mv exe.o exe.app/Contents/MacOS/.
 	exe.app/Contents/MacOS/exe.o
+	
+run:
+	exe.app/Contents/MacOS/exe.o
 
 
 clean:

@@ -1,5 +1,5 @@
 /*
- *	Main function of the 3D-pacman project where all the game switching logic is programmed
+ *	Main function of the 3D-pacman project where all the game logic is programmed
  *	Maintainer: Wei Lun William Chen
  *	email: weilunwc@andrew.cmu.edu
  */
@@ -20,7 +20,6 @@
 #include "maze3D.h"
 #include "pauseMenu.h"
 #include "yssimplesound.h"
-#include "view.h"
 
 using namespace std;
 
@@ -28,30 +27,121 @@ const int blockNumber = 25;
 int blockSize_2D = 6;
 int blockSize_3D = 7;
 const string nullString = "\0";
-bool plot3d = true;
-//bool plot3d = false;
-
 
 double myPi = 3.1415926;
 const int ghostNumber = 10;
 const int totalPells = 1883;
 
+/* Changes the keyboard commands to pacman control commnads */
+int Key2PacCmd(int key, bool exchangePlayers){
+	int cmd;
+	if(exchangePlayers == false){
+		/* player on the right is pacman */	
+		switch(key){
+			case FSKEY_LEFT:
+				cmd = PAC_LEFT;
+				break;
+			case FSKEY_RIGHT:
+				cmd = PAC_RIGHT;
+				break;
+			case FSKEY_UP:
+				cmd = PAC_UP;
+				break;
+			case FSKEY_DOWN:
+				cmd = PAC_DOWN;
+				break;
+			default:
+				cmd = PAC_NONE;
+				break;
+		}
+	}
+	else{
+		/* player on the left is pacman */
+		switch(key){
+			case FSKEY_A:
+				cmd = PAC_LEFT;
+				break;
+			case FSKEY_D:
+				cmd = PAC_RIGHT;
+				break;
+			case FSKEY_W:
+				cmd = PAC_UP;
+				break;
+			case FSKEY_S:
+				cmd = PAC_DOWN;
+				break;
+			default:
+				cmd = PAC_NONE;
+		}
+	}
+	return cmd;
+}
+
+/* Changes the keyboard commands to ghost control commnads */
+int Key2GhostCmd(int key, bool exchangePlayers){
+	int cmd;
+	if(exchangePlayers == false){
+		/* player on the left is ghost */	
+		switch(key){
+			case FSKEY_A:
+				cmd = GHOST_LEFT;
+				break;
+			case FSKEY_D:
+				cmd = GHOST_RIGHT;
+				break;
+			case FSKEY_W:
+				cmd = GHOST_UP;
+				break;
+			case FSKEY_S:
+				cmd = GHOST_DOWN;
+				break;
+			case FSKEY_1:
+				cmd = GHOST_SWITCH;
+				break;
+			default:
+				cmd = GHOST_NONE;
+				break;
+		}
+
+	}
+	else{
+		/* player on the right is ghost */
+		switch(key){
+			case FSKEY_LEFT:
+				cmd = GHOST_LEFT;
+				break;
+			case FSKEY_RIGHT:
+				cmd = GHOST_RIGHT;
+				break;
+			case FSKEY_UP:
+				cmd = GHOST_UP;
+				break;
+			case FSKEY_DOWN:
+				cmd = GHOST_DOWN;
+				break;
+			case FSKEY_M:
+				cmd = GHOST_SWITCH;
+				break;
+			default:
+				cmd = GHOST_NONE;
+				break;
+		}
+	}
+	return cmd;
+}
+
 
 int main(void){
-
-	int menuLoop = 0;
-	int ruleLoop = 0;
-	
+	/* random seed */
 	srand((int)time(NULL));
-	FullMaze maze;
+	
+	/* game pages */
 	Menu menu;
 	Rule rule;
-
 	Score score;
-	maze.SetMaze();
 	PauseMenu pauseMenu;
-	
-	Play play(plot3d);
+	bool plot3d = true, visualize = true;
+	Play play(visualize, plot3d);
 	
 	FsOpenWindow(0,100,1600,600,1);
 	FsPollDevice();
@@ -59,14 +149,23 @@ int main(void){
 	int gameState = GAME_MENU;
 	bool pause = false;
 	int pauseState;
-	int countDown;
-	int mouseEvent;
-	int loopCount;
-	int lb,mb,rb,mx,my;
-	int lives;
-	int pac_eaten = 0;
-	bool rematch, finishGame;
+	bool rematch, finishGame, exchangePlayers;
+	int menuLoop, ruleLoop;
+	int score1, score2;
+	score1 = 0;
+	score2 = 0;
 
+	/* Music player */
+	YsSoundPlayer musicPlayer;
+	YsSoundPlayer::SoundData scene;
+	musicPlayer.MakeCurrent();
+	musicPlayer.Start();
+	FsChangeToProgramDir();
+	if(YSOK != scene.LoadWav("music/scene.wav")){
+		cout << "Error! Cannod load scene.wav" << endl;
+	}
+	musicPlayer.PlayBackground(scene);	
+	
 	/* Start game */	
 	while(key != FSKEY_ESC){
 		switch(gameState){
@@ -88,28 +187,56 @@ int main(void){
 				break;
 			case GAME_PLAY:
 				/* Game mode */
-				play.Restart();
 				rematch = false;
 				pause = false;
 				finishGame = false;
+				exchangePlayers = false;
+				play.Restart(exchangePlayers);
+				score1 = 0;
+				score2 = 0;
 				/* Start game */
 				while(key != FSKEY_ESC && gameState == GAME_PLAY){
-					/* Play background music */
-					play.PlayBackgroundMusic();
 
 					/* Get external device commands */
 					FsPollDevice();
 					key = FsInkey();
 					if(key == FSKEY_SPACE) pause = !pause;	
 					if(pause == false){
-						play.Step(key);
+						if(play.CheckCountDown()){
+							/* Send keyboard signals through env API */
+							int pacCmd = Key2PacCmd(key, exchangePlayers);
+							int ghostCmd = Key2GhostCmd(key, exchangePlayers);
+							int pacScore, ghostScore;
+							play.Step(pacCmd, ghostCmd, pacScore, ghostScore);
+							
+							if(exchangePlayers == false){
+								score1 += pacScore;
+								score2 += ghostScore;
+							}
+							else{
+								score1 += ghostScore;
+								score2 += pacScore;
+							}
+						}
 					}
-
-
+					else{
+						play.PauseTime();	
+					}
 					/* Graphical display */	
 					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-					play.Draw();;
-					finishGame = play.CheckEndCondition();
+					play.Draw();
+
+					/* Check end conditions */
+					if(play.CheckEndCondition()){
+						if(exchangePlayers == true){
+							finishGame = true;
+						}
+						else{
+							cout << "sup" << endl;
+							exchangePlayers = true;
+							play.Restart(exchangePlayers);
+						}
+					}
 					
 					/* Pause game */
 					if(pause == true){
@@ -135,7 +262,7 @@ int main(void){
 						pauseMenu.Draw();
 					}
 					FsSwapBuffers();
-					FsSleep(20);
+					FsSleep(100);
 
 					/* If the user decided to rematch in pause page */
 					if(rematch){
@@ -153,7 +280,6 @@ int main(void){
 				while(key != FSKEY_ESC && gameState == GAME_RULE){
 					/* Read external device */
 					FsPollDevice();
-					mouseEvent = FsGetMouseEvent(lb,mb,rb,mx,my);
 					key = FsInkey();
 					if(rule.ReadMenu() == true){
 						gameState = GAME_MENU;
@@ -169,6 +295,9 @@ int main(void){
 				break;
 			case GAME_SCORE:
 				/* Score page */
+				score.SetScore1(score1);
+				score.SetScore2(score2);
+
 				while(key != FSKEY_ESC && gameState == GAME_SCORE){
 					/* interact with external device */
 					FsPollDevice();
@@ -202,10 +331,7 @@ int main(void){
 
 	}
 	/* End of game */
+	musicPlayer.End();
 	return 0;
 }
-
-
-
-
 

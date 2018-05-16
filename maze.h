@@ -15,167 +15,11 @@
 #include <fstream>
 #include <time.h>
 #include <stdlib.h>
+
 #include "fssimplewindow.h"
 #include <vector>
+
 using namespace std;
-
-static char inputMaze[] = {
-	"1111111111111111111111111"
-		"1000000000000000000000001"
-		"1011110111101011110111101"
-		"1011110111101011110111101"
-		"1000000000101010000000001"
-		"1011111010000000101111101"
-		"1000000010111110100000001"
-		"1011111010001000101111101"
-		"1000000011101011100000001"
-		"1111111010000000101111111"
-		"1000011010110110101100001"
-		"1011011010100010101101101"
-		"1000000000100010000000001"
-		"1011011010111110101101101"
-		"1000011010000000101100001"
-		"1111111010111110101111111"
-		"1000000000000000000000001"
-		"1011101011101011101011101"
-		"1011101000000000001011101"
-		"1000001011111111101000001"
-		"1111101000011100001011111"
-		"1000000011011101100000001"
-		"1011111111011101111111101"
-		"1000000000000000000000001"
-		"1111111111111111111111111"
-
-		"1110111111110111111110111"
-		"0000000000000000000000000"
-		"1011110111101011110111101"
-		"1011110111101011110111101"
-		"1000000000101010000000001"
-		"1011111010000000101111101"
-		"1000000010111110100000001"
-		"1011111010001000101111101"
-		"1000000011101011100000001"
-		"1111111010000000101111111"
-		"1000011010110110101100001"
-		"1011011010100010101101101"
-		"0000000000100010000000000"
-		"1011011010111110101101101"
-		"1000011010000000101100001"
-		"1111111010111110101111111"
-		"1000000000000000000000001"
-		"1011101011101011101011101"
-		"1011101000000000001011101"
-		"1000001011111111101000001"
-		"1111101000011100001011111"
-		"1000000011011101100000001"
-		"1011111111011101111111101"
-		"0000000000000000000000000"
-		"1110111111110111111110111"
-
-		"1110111111110111111110111"
-		"0000000000000000000000000"
-		"1011110111101011110111101"
-		"1011110111101011110111101"
-		"1000000000101010000000001"
-		"1011111010000000101111101"
-		"1000000010111110100000001"
-		"1011111010001000101111101"
-		"1000000011101011100000001"
-		"1111111010000000101111111"
-		"1000011010110110101100001"
-		"1011011010100010101101101"
-		"0000000000100010000000000"
-		"1011011010111110101101101"
-		"1000011010000000101100001"
-		"1111111010111110101111111"
-		"1000000000000000000000001"
-		"1011101011101011101011101"
-		"1011101000000000001011101"
-		"1000001011111111101000001"
-		"1111101000011100001011111"
-		"1000000011011101100000001"
-		"1011111111011101111111101"
-		"0000000000000000000000000"
-		"1110111111110111111110111"
-
-		"1110111111110111111110111"
-		"0000000000000000000000000"
-		"1011110111101011110111101"
-		"1011110111101011110111101"
-		"1000000000101010000000001"
-		"1011111010000000101111101"
-		"1000000010111110100000001"
-		"1011111010001000101111101"
-		"1000000011101011100000001"
-		"1111111010000000101111111"
-		"1000011010110110101100001"
-		"1011011010100010101101101"
-		"0000000000100010000000000"
-		"1011011010111110101101101"
-		"1000011010001000101100001"
-		"1111111010111110101111111"
-		"1000000000000000000000001"
-		"1011101011101011101011101"
-		"1011101000000000001011101"
-		"1000001011111111101000001"
-		"1111101000011100001011111"
-		"1000000011011101100000001"
-		"1011111111011101111111101"
-		"0000000000000000000000000"
-		"1110111111110111111110111"
-
-		"1110111111110111111110111"
-		"0000000000000000000000000"
-		"1011110111101011110111101"
-		"1011110111101011110111101"
-		"1000000000101010000000001"
-		"1011111010000000101111101"
-		"1000000010111110100000001"
-		"1011111010001000101111101"
-		"1000000011101011100000001"
-		"1111111010000000101111111"
-		"1000011010110110101100001"
-		"1011011010100010101101101"
-		"0000000000100010000000000"
-		"1011011010111110101101101"
-		"1000011010000000101100001"
-		"1111111010111110101111111"
-		"1000000000000000000000001"
-		"1011101011101011101011101"
-		"1011101000000000001011101"
-		"1000001011111111101000001"
-		"1111101000011100001011111"
-		"1000000011011101100000001"
-		"1011111111011101111111101"
-		"0000000000000000000000000"
-		"1110111111110111111110111"
-
-		"1111111111111111111111111"
-		"1000000000000000000000001"
-		"1011110111101011110111101"
-		"1011110111101011110111101"
-		"1000000000101010000000001"
-		"1011111010000000101111101"
-		"1000000010111110100000001"
-		"1011111010001000101111101"
-		"1000000011101011100000001"
-		"1111111010000000101111111"
-		"1000011010110110101100001"
-		"1011011010100010101101101"
-		"1000000000100010000000001"
-		"1011011010111110101101101"
-		"1000011010000000101100001"
-		"1111111010111110101111111"
-		"1000000000000000000000001"
-		"1011101011101011101011101"
-		"1011101000000000001011101"
-		"1000001011111111101000001"
-		"1111101000011100001011111"
-		"1000000011011101100000001"
-		"1011111111011101111111101"
-		"1000000000000000000000001"
-		"1111111111111111111111111"
-};
 
 /* Global variables shared by the whole program */
 extern int blockSize_2D;
@@ -183,6 +27,36 @@ extern const int blockNumber;  // the size of the surface array
 extern double myPi;
 extern const int ghostNumber;
 
+/* Commands */
+enum
+{
+	PAC_UP,
+	PAC_DOWN,
+	PAC_LEFT,
+	PAC_RIGHT,
+	PAC_NONE
+};
+
+enum
+{
+	GHOST_UP,
+	GHOST_DOWN,
+	GHOST_LEFT,
+	GHOST_RIGHT,
+	GHOST_SWITCH,
+	GHOST_NONE
+};
+
+/* Surface */
+enum
+{
+	SURFACE_T,
+	SURFACE_N,
+	SURFACE_W,
+	SURFACE_S,
+	SURFACE_E,
+	SURFACE_B,
+};
 
 /* the pacman x,y coordinates*/
 typedef struct CoordStruct{
@@ -222,33 +96,33 @@ typedef struct ColorStruct{
  * each block
  */
 class Maze{
-	protected:
-		int **maze;
-		int pacState; // 0 not in this surface, 1 not clear box, 2 clear box
-		Coord pacman;
-		Coord cherry;
-		vector<bool> ghostState;
-		Coord origin; // the (0,0) point on the global coordinates
-		char orientation;
-		Color baseColor; // R,G,B
+protected:
+	int **maze;
+	int pacState; // 0 not in this surface, 1 not clear box, 2 clear box
+	Coord pacman;
+	Coord cherry;
+	vector<bool> ghostState;
+	Coord origin; // the (0,0) point on the global coordinates
+	char orientation;
+	Color baseColor; // R,G,B
 
-	public:
-		Maze();
-		~Maze();
-		void SetMaze(int,int,int); // set the maze array
-		void SetCherry();
-		void SetPowerPells();
-		void SetOrientation(char); // set the maze's relative position to other surfaces
-		void Draw();
-		void DrawGhost(int,int);
-		void Print();
-		bool EatPerl(int,int);
-		bool EatCherry(int,int);
-		bool EatPowerPell(int,int);
-		void Activate(PacMan,int);// changes pacman coordinates and state
-		void Deactivate(); // turns down the pacman drawing
-		const int ReturnElement(int,int)const; // return the element of a coordinate
-		int ReturnPerls();
+public:
+	Maze();
+	~Maze();
+	void SetMaze(int,int,int); // set the maze array
+	void SetCherry();
+	void SetPowerPells();
+	void SetOrientation(char); // set the maze's relative position to other surfaces
+	void Draw();
+	void DrawGhost(int,int);
+	void Print();
+	bool EatPerl(int,int);
+	bool EatCherry(int,int);
+	bool EatPowerPell(int,int);
+	void Activate(PacMan,int);// changes pacman coordinates and state
+	void Deactivate(); // turns down the pacman drawing
+	const int ReturnElement(int,int)const; // return the element of a coordinate
+	int ReturnPerls();
 };
 
 Maze::Maze(){
@@ -341,42 +215,42 @@ void Maze::SetMaze(int i,int j,int input){
 void Maze::SetOrientation(char orient){
 	orientation = orient;
 	switch(orient){
-		case 'T':
+		case SURFACE_T:
 			baseColor.r = 200;
 			baseColor.g = 0;
 			baseColor.b = 0;
 			origin.x = 2*blockNumber*blockSize_2D;
 			origin.y = 0;
 			break;
-		case 'B':
+		case SURFACE_B:
 			baseColor.r = 0;
 			baseColor.g = 200;
 			baseColor.b = 0;
 			origin.x = 2*blockNumber*blockSize_2D;
 			origin.y = 2*blockNumber*blockSize_2D;
 			break;
-		case 'N':
+		case SURFACE_N:
 			baseColor.r = 0;
 			baseColor.g = 0;
 			baseColor.b = 200;
 			origin.x = 0;
 			origin.y = blockNumber*blockSize_2D;
 			break;
-		case 'W':
+		case SURFACE_W:
 			baseColor.r = 200;
 			baseColor.g = 0;
 			baseColor.b = 200;
 			origin.x = blockNumber*blockSize_2D;
 			origin.y = blockNumber*blockSize_2D;
 			break;
-		case 'S':
+		case SURFACE_S:
 			baseColor.r = 200;
 			baseColor.g = 200;
 			baseColor.b = 0;
 			origin.x = 2*blockNumber*blockSize_2D;
 			origin.y = blockNumber*blockSize_2D;
 			break;
-		case 'E':
+		case SURFACE_E:
 			baseColor.r = 0;
 			baseColor.g = 200;
 			baseColor.b = 200;
@@ -387,19 +261,16 @@ void Maze::SetOrientation(char orient){
 	}
 }
 
-
 const int Maze::ReturnElement(int i,int j)const{
 	return maze[i][j];
 }
 
 void Maze::Print(){
-	//printf("Orientation = %c\n",orientation);
 	for(int i = 0;i < blockNumber;i++){
-		printf("%c",34);
 		for(int j = 0;j < blockNumber;j++){
 			printf("%d",maze[j][i]);
 		}
-		printf("%c\n",34);
+		printf("\n");
 	}
 	printf("\n");
 }
@@ -424,7 +295,6 @@ void Maze::DrawGhost(int x,int y){
 	glVertex2i(origin.x + x            ,origin.y + y + blockSize_2D);
 	glEnd();
 }
-
 
 void Maze::Draw(){
 	for(int i = 0;i < blockNumber;i++){
@@ -524,63 +394,60 @@ void Maze::Draw(){
 	glEnd();
 }
 
-
-
-
-
+/* 6 Maze at each surface */
 class FullMaze{
-	private:
-		Maze maze[6]; // 0-T,1-N,2-W,3-S,4-E,5-B
+private:
+	Maze maze[6]; // 0-T,1-N,2-W,3-S,4-E,5-B
 
-		vector<Ghost> ghost;
-		int ghostControl;
-		int ghostLives;
+	vector<Ghost> ghost;
+	int ghostControl;
+	int ghostLives;
 
-		//char pacSurface;
-		int curState; // 1 for not clear, 2 for clear box
-		//int xdir,ydir;
-	public:
-		PacMan pacman;
-		int ghost_eaten;
-		int perls;
-		int cherries;
-		FullMaze(){};
-		void Draw();
-		void Print();
-		void PacMove();
-		void GhostMove(int);
-		void Restart();
-		void Restore();
-		void RandomDirection(int);
-		void ChangeDirection(int);
-		void ChangeGhostDirection(int);
-		int ReturnGhostControl();
-		bool CollisionDetect();
-		void SetMaze();
-		void SetCherry();
-		void SetPowerPells();
-		//void EatPerl(int,int,int);
-		const void ReturnMaze(int***)const;
-		void ReturnPacman(PacMan*);
-		void ReturnGhost(vector<Ghost>*);
-		int ReturnPerls();
-		void ChangeIndexToDir(int);
-		void SwitchGhost(int);
-		int surfaceToNum(char);
-		char NumToSurface(int);
-		void GhostChase(int,int,int);
+	//char pacSurface;
+	int curState; // 1 for not clear, 2 for clear box
+
+public:
+	PacMan pacman;
+	int ghost_eaten;
+	int perls;
+	int cherries;
+	FullMaze(){};
+	void Draw();
+	void Print();
+	void PacMove();
+	void GhostMove(int);
+	void Restart();
+	void Restore();
+	void RandomDirection(int);
+	void ChangePacDirection(int);
+	void ChangeGhostDirection(int);
+	int ReturnGhostControl();
+	bool CollisionDetect();
+	void SetMaze();
+	void SetCherry();
+	void SetPowerPells();
+	//void EatPerl(int,int,int);
+	const void ReturnMaze(int***)const;
+	void ReturnPacman(PacMan &pacInfo);
+	void ReturnGhost(vector<Ghost> &ghostInfo);
+	int ReturnPerls();
+	void ChangeIndexToDir(int);
+	void SwitchGhost();
+	int surfaceToNum(char);
+	char NumToSurface(int);
+	void GhostChase(int,int,int);
 };
 
 
 void FullMaze::Restart(){
 	SetMaze();
-	maze[0].SetOrientation('T');
-	maze[1].SetOrientation('N');
-	maze[2].SetOrientation('W');
-	maze[3].SetOrientation('S');
-	maze[4].SetOrientation('E');
-	maze[5].SetOrientation('B');
-	//pacSurface = 'S';
+	maze[0].SetOrientation(SURFACE_T);
+	maze[1].SetOrientation(SURFACE_N);
+	maze[2].SetOrientation(SURFACE_W);
+	maze[3].SetOrientation(SURFACE_S);
+	maze[4].SetOrientation(SURFACE_E);
+	maze[5].SetOrientation(SURFACE_B);
+	//pacSurface = SURFACE_S;
 	ghost_eaten = 0;
 	cherries = 0;
 	pacman.surface = 3;
@@ -654,6 +521,7 @@ int FullMaze::ReturnPerls(){
 	return perls;
 }
 
+/* Simple heuristic AI for automatic ghost chase */
 void FullMaze::GhostChase(int index, int x, int y) {
 	int distx = abs(x - ghost[index].x);
 	int disty = abs(y - ghost[index].y);
@@ -673,12 +541,15 @@ void FullMaze::GhostChase(int index, int x, int y) {
 		else { ghost[index].dirIndex = 1; }
 	}
 }
+
+/* Place cherry on every surface */
 void FullMaze::SetCherry(){
 	for(int i = 0;i < 6;i++){
 		maze[i].SetCherry();
 	}
 }
 
+/* Place PowerPells */
 void FullMaze::SetPowerPells(){
 	for(int i = 0;i < 6;i++){
 		maze[i].SetPowerPells();
@@ -691,15 +562,7 @@ int FullMaze::ReturnGhostControl(){
 }
 
 void FullMaze::Restore(){
-	/*
-	   maze[0].SetOrientation('T');
-	   maze[1].SetOrientation('N');
-	   maze[2].SetOrientation('W');
-	   maze[3].SetOrientation('S');
-	   maze[4].SetOrientation('E');
-	   maze[5].SetOrientation('B');
-	   */
-	//pacSurface = 'S';
+	
 	pacman.surface = 3;
 	curState = 1;
 	pacman.x = 8;
@@ -740,17 +603,17 @@ void FullMaze::Restore(){
 }
 int FullMaze::surfaceToNum(char sur){
 	switch(sur){
-		case 'T':
+		case SURFACE_T:
 			return 0;
-		case 'N':
+		case SURFACE_N:
 			return 1;
-		case 'W':
+		case SURFACE_W:
 			return 2;
-		case 'S':
+		case SURFACE_S:
 			return 3;
-		case 'E':
+		case SURFACE_E:
 			return 4;
-		case 'B':
+		case SURFACE_B:
 			return 5;
 		default:
 			return 3;
@@ -760,22 +623,23 @@ int FullMaze::surfaceToNum(char sur){
 char FullMaze::NumToSurface(int num){
 	switch(num){
 		case 0:
-			return 'T';
+			return SURFACE_T;
 		case 1:
-			return 'N';
+			return SURFACE_N;
 		case 2:
-			return 'W';
+			return SURFACE_W;
 		case 3:
-			return 'S';
+			return SURFACE_S;
 		case 4:
-			return 'E';
+			return SURFACE_E;
 		case 5:
-			return 'B';
+			return SURFACE_B;
 		default:
-			return 'S';
+			return SURFACE_S;
 	}
 }
 
+/* Check if there is a collision between ghost and pacman */
 bool FullMaze::CollisionDetect(){
 	int n = ghost.size();
 	bool detect = false;
@@ -835,52 +699,10 @@ bool FullMaze::CollisionDetect(){
 			}
 		}
 	}
-	/*
-	   if(n == 1 && detect){
-	   ghost.resize(1);
-	   ghostLives = 1;
-	   int i = 0;
-	   ghost[i].xdir = 0;
-	   ghost[i].ydir = 0;
-	   ghost[i].surface = 3;
-	   ghost[i].x = 11;
-	   ghost[i].y = 11;
-	   ghost[i].prevX = 11;
-	   ghost[i].prevY = 11;
-	   Ghost lastGhost;
-	   lastGhost.xdir = 0;
-	   lastGhost.ydir = 0;
-	   lastGhost.surface = 3;
-	   lastGhost.x = 11;
-	   lastGhost.y = 11;
-	   lastGhost.prevX = 11;
-	   lastGhost.prevY = 11;
-	   ghost.push_back(lastGhost);
-	   ghostControl = 0;
-	   ghostLives++;
-	   }
-	   */
 	return false;
 }
 
 
-void FullMaze::SwitchGhost(int index){
-	//ghostControl = index % ghostLives;
-	vector<int> tmp;
-	int n = ghost.size();
-	for (int i = 0;i < n;i++) {
-		if (ghost[i].surface == pacman.surface){
-			tmp.push_back(i);
-		}
-	}
-	n = tmp.size();
-	if(n != 0){
-		ghostControl = tmp[rand() % n];
-	}
-	else{
-		ghostControl = rand() % ghost.size();
-	}
-}
 
 void FullMaze::Draw(){
 	for(int i = 0;i < 6;i++){
@@ -897,50 +719,21 @@ void FullMaze::Draw(){
 	}
 }
 
-void FullMaze::ReturnGhost(vector<Ghost> *ghostInfo){
+void FullMaze::ReturnGhost(vector<Ghost> &ghostInfo){
 	int n = ghost.size();
-	ghostInfo->clear();
+	ghostInfo.clear();
 	for(int i = 0;i < n;i++){
-		ghostInfo->push_back(ghost[i]);
+		ghostInfo.push_back(ghost[i]);
 	}
 }
 
-void FullMaze::ReturnPacman(PacMan* pacInfo){
-	/*
-	   switch(pacman.surface){
-	   case 'T':
-	   curInfo[0] = 0;
-	   break;
-	   case 'N':
-	   curInfo[0] = 1;
-	   break;
-	   case 'W':
-	   curInfo[0] = 2;
-	   break;
-	   case 'S':
-	   curInfo[0] = 3;
-	   break;
-	   case 'E':
-	   curInfo[0] = 4;
-	   break;
-	   case 'B':
-	   curInfo[0] = 5;
-	   break;
-	   }
-	   */
-	/*
-	   curInfo[0] = pacman.surface;
-	   curInfo[1] = pacman.x;
-	   curInfo[2] = pacman.y;
-	   curInfo[3] = pacman.xdir;
-	   curInfo[4] = pacman.ydir;
-	   */
-	pacInfo->x = pacman.x;
-	pacInfo->y = pacman.y;
-	pacInfo->xdir = pacman.xdir;
-	pacInfo->ydir = pacman.ydir;
-	pacInfo->surface = pacman.surface;
-	pacInfo->powerState = pacman.powerState;
+void FullMaze::ReturnPacman(PacMan &pacInfo){
+	pacInfo.x = pacman.x;
+	pacInfo.y = pacman.y;
+	pacInfo.xdir = pacman.xdir;
+	pacInfo.ydir = pacman.ydir;
+	pacInfo.surface = pacman.surface;
+	pacInfo.powerState = pacman.powerState;
 }
 
 
@@ -967,35 +760,24 @@ void FullMaze::RandomDirection(int index){
 	}
 }
 
-
+/* Load from text and build maze */
 void FullMaze::SetMaze(){
+
+	fstream input;
+	string buffer;
+	input.open("maps/map25.txt",ios::in);
 	for(int i = 0;i < 6;i++){
 		for(int j = 0;j < blockNumber;j++){
+			input >> buffer;
 			for(int k = 0;k < blockNumber;k++){
-				maze[i].SetMaze(k, j, inputMaze[625*i + 25*j+k] - '0');
+				maze[i].SetMaze(k, j, buffer[k] - '0');
 			}
+			//cout << buffer << endl;
 		}
+		//cout << endl;
 	}
-
-
-	/*
-	   fstream input;
-	   string buffer;
-	   input.open(mazeFIle,ios::in);
-	   for(int i = 0;i < 6;i++){
-	   for(int j = 0;j < blockNumber;j++){
-	   input >> buffer;
-	   for(int k = 0;k < blockNumber;k++){
-	   maze[i].SetMaze(j,k,buffer[k] - '0');
-	   }
-	   cout << buffer << endl;
-	   }
-	   cout << endl;
-	   }
-	   input.close();
-	   */
+	input.close();
 }
-
 
 void FullMaze::Print(){
 	for(int i = 0;i < 6;i++){
@@ -1013,26 +795,24 @@ const void FullMaze::ReturnMaze(int *** output)const{
 	}
 }
 
-/*
-   void FullMaze::EatPerl(int i,int j,int k){
-   maze[i].EatPerl(j,k);
-   }
-   */
-void FullMaze::ChangeDirection(int dir){
+/* PacMan reads command and change directiond */
+//note that the ydir is not intuitive due to matrix nature 
+void FullMaze::ChangePacDirection(int dir){
 	switch(dir){
-		case 1:
+		case PAC_LEFT:
 			pacman.xdir = -1;
 			pacman.ydir = 0;
 			break;
-		case 2:
+		case PAC_UP:
+
 			pacman.ydir = -1;
 			pacman.xdir = 0;
 			break;
-		case 3:
+		case PAC_RIGHT:
 			pacman.xdir = 1;
 			pacman.ydir = 0;
 			break;
-		case 4:
+		case PAC_DOWN:
 			pacman.xdir = 0;
 			pacman.ydir = 1;
 			break;
@@ -1044,207 +824,54 @@ void FullMaze::ChangeDirection(int dir){
 
 void FullMaze::ChangeGhostDirection(int dir){
 	switch(dir){
-		case 1:
+		case GHOST_LEFT:
 			ghost[ghostControl].xdir = -1;
 			ghost[ghostControl].ydir = 0;
 			break;
-		case 2:
+		case GHOST_UP:
 			ghost[ghostControl].ydir = -1;
 			ghost[ghostControl].xdir = 0;
 			break;
-		case 3:
+		case GHOST_RIGHT:
 			ghost[ghostControl].xdir = 1;
 			ghost[ghostControl].ydir = 0;
 			break;
-		case 4:
+		case GHOST_DOWN:
 			ghost[ghostControl].xdir = 0;
 			ghost[ghostControl].ydir = 1;
+			break;
+		case GHOST_SWITCH:
+			SwitchGhost();
+			break;
+		case GHOST_NONE:
+			// do nothing 
 			break;
 		default:
 			/* do nothing if unknown command */
 			break;
 	}
 }
-/*
-   void FullMaze::GhostMove(){
 
-   int prevX,prevY,prevSurface;
-   int n = ghost.size();
-   for(int i = 0;i < n;i++){
-   prevSurface = ghost[i].surface;
-   prevX = ghost[i].x;
-   prevY = ghost[i].y;
-   if(ghost[i].xdir < 0){
-   ghost[i].x--;
-   if(ghost[i].x < 0){
-   switch(ghost[i].surface){
-   case 0:
-   ghost[i].surface = 2;
-   ghost[i].x = ghost[i].y;
-   ghost[i].y = 0;
-   ghost[i].xdir = 0;
-   ghost[i].ydir = 1;
-   break;
-   case 1:
-   ghost[i].surface = 4;
-   ghost[i].x = blockNumber-1;
-   break;
-   case 2:
-   ghost[i].surface = 1;
-   ghost[i].x = blockNumber-1;
-   break;
-   case 3:
-   ghost[i].surface = 2;
-   ghost[i].x = blockNumber-1;
-   break;
-   case 4:
-   ghost[i].surface = 3;
-   ghost[i].x = blockNumber-1;
-   break;
-   case 5:
-   ghost[i].surface = 2;
-   ghost[i].x = blockNumber-1 - ghost[i].y;
-   ghost[i].y = blockNumber-1;
-   ghost[i].xdir = 0;
-   ghost[i].ydir = -1;
-   break;
-   }
-   }
-   }
-   else if(ghost[i].ydir < 0){
-   ghost[i].y--;
-   if(ghost[i].y < 0){
-   switch(ghost[i].surface){
-   case 0:
-   ghost[i].surface = 1;
-   ghost[i].x = blockNumber-1 - ghost[i].x;
-   ghost[i].y = 0;
-   ghost[i].ydir = 1;
-   break;
-   case 1:
-   ghost[i].surface = 0;
-   ghost[i].x = blockNumber-1 - ghost[i].x;
-   ghost[i].y = 0;
-   ghost[i].ydir = 1;
-   break;
-   case 2:
-   ghost[i].surface = 0;
-   ghost[i].y = ghost[i].x;
-   ghost[i].x = 0;
-   ghost[i].ydir = 0;
-   ghost[i].xdir = 1;
-   break;
-   case 3:
-   ghost[i].surface = 0;
-ghost[i].y = blockNumber-1;
-break;
-case 4:
-ghost[i].surface = 0;
-ghost[i].y= blockNumber-1 - ghost[i].x;
-ghost[i].x = blockNumber-1;
-ghost[i].xdir = -1;
-ghost[i].ydir = 0;
-break;
-case 5:
-ghost[i].surface = 3;
-ghost[i].y = blockNumber-1;
-break;
-}
-}
-}
-else if(ghost[i].xdir > 0){
-	ghost[i].x++;
-	if(ghost[i].x >= blockNumber){
-		switch(ghost[i].surface){
-			case 0:
-				ghost[i].surface = 4;
-				ghost[i].x = blockNumber-1 - ghost[i].y;
-				ghost[i].y = 0;
-				ghost[i].xdir = 0;
-				ghost[i].ydir = 1;
-				break;
-			case 1:
-				ghost[i].surface = 2;
-				ghost[i].x = 0;
-				break;
-			case 2:
-				ghost[i].surface = 3;
-				ghost[i].x = 0;
-				break;
-			case 3:
-				ghost[i].surface = 4;
-				ghost[i].x = 0;
-				break;
-			case 4:
-				ghost[i].surface = 1;
-				ghost[i].x = 0;
-				break;
-			case 5:
-				ghost[i].surface = 4;
-				ghost[i].x = ghost[i].y;
-				ghost[i].y = blockNumber-1;
-				ghost[i].xdir = 0;
-				ghost[i].ydir = -1;
-				break;
+/* ghost player switch the ghost it wants to control */
+void FullMaze::SwitchGhost(){
+	//ghostControl = index % ghostLives;
+	vector<int> tmp;
+	int n = ghost.size();
+	for (int i = 0;i < n;i++) {
+		if (ghost[i].surface == pacman.surface){
+			tmp.push_back(i);
 		}
 	}
-}
-else if(ghost[i].ydir > 0){
-	ghost[i].y++;
-	if(ghost[i].y >= blockNumber){
-		switch(ghost[i].surface){
-			case 0:
-				ghost[i].surface = 3;
-				ghost[i].y = 0;
-				break;
-			case 1:
-				ghost[i].surface = 5;
-				ghost[i].x = blockNumber-1-ghost[i].x;
-				ghost[i].y = blockNumber-1;
-				ghost[i].ydir = -1;
-				break;
-			case 2:
-				ghost[i].surface = 5;
-				ghost[i].y = blockNumber-1-ghost[i].x;
-				ghost[i].x = 0;
-				ghost[i].xdir = 1;
-				ghost[i].ydir=  0;
-				break;
-			case 3:
-				ghost[i].surface = 5;
-				ghost[i].y = 0;
-				break;
-			case 4:
-				ghost[i].surface = 5;
-				ghost[i].y = ghost[i].x;
-				ghost[i].x = blockNumber-1;
-				ghost[i].ydir = 0;
-				ghost[i].xdir = -1;
-				break;
-			case 5:
-				ghost[i].surface = 1;
-				ghost[i].x = blockNumber-1 - ghost[i].x;
-				ghost[i].y = blockNumber-1;
-				ghost[i].ydir = -1;
-				break;
-		}
+	n = tmp.size();
+	if(n != 0){
+		ghostControl = tmp[rand() % n];
+	}
+	else{
+		ghostControl = rand() % ghost.size();
 	}
 }
-int x = ghost[i].x;
-int y = ghost[i].y;
-int surface = ghost[i].surface;
-if(maze[surface].ReturnElement(x,y) == 1){
-	ghost[i].x = prevX;
-	ghost[i].y = prevY;
-	ghost[i].surface = prevSurface;
-	if(i != ghostControl){
-		RandomDirection(i);
-	}
-}
-}
-}
-*/
 
+/* Literally move the ghost */
 void FullMaze::GhostMove(int loopCount) {
 	int n = ghost.size();
 	int prevX, prevY, prevSurface;
@@ -1605,7 +1232,7 @@ void FullMaze::GhostMove(int loopCount) {
 }
 
 void FullMaze::PacMove(){
-	int prevX,prevY,prevSurface;
+	int prevX, prevY, prevSurface;
 	prevX = pacman.x;
 	prevY = pacman.y;
 	pacman.prevX = pacman.x;
@@ -1615,41 +1242,41 @@ void FullMaze::PacMove(){
 		pacman.x--;
 		if(pacman.x < 0){
 			switch(NumToSurface(pacman.surface)){
-				case 'T':
+				case SURFACE_T:
 					maze[0].Deactivate();
-					pacman.surface = surfaceToNum('W');
+					pacman.surface = surfaceToNum(SURFACE_W);
 					pacman.x = pacman.y;
 					pacman.y = 0;
 					pacman.xdir = 0;
 					pacman.ydir = 1;
 					break;
-				case 'N':
+				case SURFACE_N:
 					maze[1].Deactivate();
-					pacman.surface = surfaceToNum('E');
+					pacman.surface = surfaceToNum(SURFACE_E);
 					pacman.x = blockNumber-1;
 					break;
-				case 'W':
+				case SURFACE_W:
 					maze[2].Deactivate();
-					pacman.surface = surfaceToNum('N');
-					//pacman.surface = 'N';
+					pacman.surface = surfaceToNum(SURFACE_N);
+					//pacman.surface = SURFACE_N;
 					pacman.x = blockNumber-1;
 					break;
-				case 'S':
+				case SURFACE_S:
 					maze[3].Deactivate();
-					//pacSurface = 'W';
-					pacman.surface = surfaceToNum('W');
+					//pacSurface = SURFACE_W;
+					pacman.surface = surfaceToNum(SURFACE_W);
 					pacman.x = blockNumber-1;
 					break;
-				case 'E':
+				case SURFACE_E:
 					maze[4].Deactivate();
-					//pacSurface = 'S';
-					pacman.surface = surfaceToNum('S');
+					//pacSurface = SURFACE_S;
+					pacman.surface = surfaceToNum(SURFACE_S);
 					pacman.x = blockNumber-1;
 					break;
-				case 'B':
+				case SURFACE_B:
 					maze[5].Deactivate();
-					pacman.surface = surfaceToNum('W');
-					//pacSurface = 'W';
+					pacman.surface = surfaceToNum(SURFACE_W);
+					//pacSurface = SURFACE_W;
 					pacman.x = blockNumber-1 - pacman.y;
 					pacman.y = blockNumber-1;
 					pacman.xdir = 0;
@@ -1662,50 +1289,50 @@ void FullMaze::PacMove(){
 		pacman.y--;
 		if(pacman.y < 0){
 			switch(NumToSurface(pacman.surface)){
-				case 'T':
+				case SURFACE_T:
 					maze[0].Deactivate();
-					//pacSurface = 'N';
-					pacman.surface = surfaceToNum('N');
+					//pacSurface = SURFACE_N;
+					pacman.surface = surfaceToNum(SURFACE_N);
 					pacman.x = blockNumber-1 - pacman.x;
 					pacman.y = 0;
 					pacman.ydir = 1;
 					break;
-				case 'N':
+				case SURFACE_N:
 					maze[1].Deactivate();
-					//pacSurface = 'T';
-					pacman.surface = surfaceToNum('T');
+					//pacSurface = SURFACE_T;
+					pacman.surface = surfaceToNum(SURFACE_T);
 					pacman.x = blockNumber-1 - pacman.x;
 					pacman.y = 0;
 					pacman.ydir = 1;
 					break;
-				case 'W':
+				case SURFACE_W:
 					maze[2].Deactivate();
-					//pacSurface = 'T';
-					pacman.surface = surfaceToNum('T');
+					//pacSurface = SURFACE_T;
+					pacman.surface = surfaceToNum(SURFACE_T);
 					pacman.y = pacman.x;
 					pacman.x = 0;
 					pacman.ydir = 0;
 					pacman.xdir = 1;
 					break;
-				case 'S':
+				case SURFACE_S:
 					maze[3].Deactivate();
-					//pacSurface = 'T';
-					pacman.surface = surfaceToNum('T');
+					//pacSurface = SURFACE_T;
+					pacman.surface = surfaceToNum(SURFACE_T);
 					pacman.y = blockNumber-1;
 					break;
-				case 'E':
+				case SURFACE_E:
 					maze[4].Deactivate();
-					//pacSurface = 'T';
-					pacman.surface = surfaceToNum('T');
+					//pacSurface = SURFACE_T;
+					pacman.surface = surfaceToNum(SURFACE_T);
 					pacman.y= blockNumber-1 - pacman.x;
 					pacman.x = blockNumber-1;
 					pacman.xdir = -1;
 					pacman.ydir = 0;
 					break;
-				case 'B':
+				case SURFACE_B:
 					maze[5].Deactivate();
-					//pacSurface = 'S';
-					pacman.surface = surfaceToNum('S');
+					//pacSurface = SURFACE_S;
+					pacman.surface = surfaceToNum(SURFACE_S);
 					pacman.y = blockNumber-1;
 					break;
 			}
@@ -1715,43 +1342,43 @@ void FullMaze::PacMove(){
 		pacman.x++;
 		if(pacman.x >= blockNumber){
 			switch(NumToSurface(pacman.surface)){
-				case 'T':
+				case SURFACE_T:
 					maze[0].Deactivate();
-					pacman.surface = surfaceToNum('E');
-					//pacSurface = 'E';
+					pacman.surface = surfaceToNum(SURFACE_E);
+					//pacSurface = SURFACE_E;
 					pacman.x = blockNumber-1 - pacman.y;
 					pacman.y = 0;
 					pacman.xdir = 0;
 					pacman.ydir = 1;
 					break;
-				case 'N':
+				case SURFACE_N:
 					maze[1].Deactivate();
-					//pacSurface = 'W';
-					pacman.surface = surfaceToNum('W');
+					//pacSurface = SURFACE_W;
+					pacman.surface = surfaceToNum(SURFACE_W);
 					pacman.x = 0;
 					break;
-				case 'W':
+				case SURFACE_W:
 					maze[2].Deactivate();
-					//pacSurface = 'S';
-					pacman.surface = surfaceToNum('S');
+					//pacSurface = SURFACE_S;
+					pacman.surface = surfaceToNum(SURFACE_S);
 					pacman.x = 0;
 					break;
-				case 'S':
+				case SURFACE_S:
 					maze[3].Deactivate();
-					//pacSurface = 'E';
-					pacman.surface = surfaceToNum('E');
+					//pacSurface = SURFACE_E;
+					pacman.surface = surfaceToNum(SURFACE_E);
 					pacman.x = 0;
 					break;
-				case 'E':
+				case SURFACE_E:
 					maze[4].Deactivate();
-					//pacSurface = 'N';
-					pacman.surface = surfaceToNum('N');
+					//pacSurface = SURFACE_N;
+					pacman.surface = surfaceToNum(SURFACE_N);
 					pacman.x = 0;
 					break;
-				case 'B':
+				case SURFACE_B:
 					maze[5].Deactivate();
-					//pacSurface = 'E';
-					pacman.surface = surfaceToNum('E');
+					//pacSurface = SURFACE_E;
+					pacman.surface = surfaceToNum(SURFACE_E);
 					pacman.x = pacman.y;
 					pacman.y = blockNumber-1;
 					pacman.xdir = 0;
@@ -1764,49 +1391,49 @@ void FullMaze::PacMove(){
 		pacman.y++;
 		if(pacman.y >= blockNumber){
 			switch(NumToSurface(pacman.surface)){
-				case 'T':
+				case SURFACE_T:
 					maze[0].Deactivate();
-					//pacSurface = 'S';
-					pacman.surface = surfaceToNum('S');
+					//pacSurface = SURFACE_S;
+					pacman.surface = surfaceToNum(SURFACE_S);
 					pacman.y = 0;
 					break;
-				case 'N':
+				case SURFACE_N:
 					maze[1].Deactivate();
-					//pacSurface = 'B';
-					pacman.surface = surfaceToNum('B');
+					//pacSurface = SURFACE_B;
+					pacman.surface = surfaceToNum(SURFACE_B);
 					pacman.x = blockNumber-1-pacman.x;
 					pacman.y = blockNumber-1;
 					pacman.ydir = -1;
 					break;
-				case 'W':
+				case SURFACE_W:
 					maze[2].Deactivate();
-					//pacSurface = 'B';
-					pacman.surface = surfaceToNum('B');
+					//pacSurface = SURFACE_B;
+					pacman.surface = surfaceToNum(SURFACE_B);
 					pacman.y = blockNumber-1-pacman.x;
 					pacman.x = 0;
 					pacman.ydir = 0;
 					pacman.xdir = 1;
 					break;
-				case 'S':
+				case SURFACE_S:
 					maze[3].Deactivate();
-					//pacSurface = 'B';
-					pacman.surface = surfaceToNum('B');
+					//pacSurface = SURFACE_B;
+					pacman.surface = surfaceToNum(SURFACE_B);
 					pacman.y = 0;
 					break;
-				case 'E':
+				case SURFACE_E:
 					maze[4].Deactivate();
-					//pacSurface = 'B';
-					pacman.surface = surfaceToNum('B');
+					//pacSurface = SURFACE_B;
+					pacman.surface = surfaceToNum(SURFACE_B);
 					pacman.y = pacman.x;
 					pacman.x = blockNumber-1;
 					pacman.ydir = 0;
 					pacman.xdir = -1;
 					//bool powerState;
 					break;
-				case 'B':
+				case SURFACE_B:
 					maze[5].Deactivate();
-					//pacSurface = 'N';
-					pacman.surface = surfaceToNum('N');
+					//pacSurface = SURFACE_N;
+					pacman.surface = surfaceToNum(SURFACE_N);
 					pacman.x = blockNumber-1 - pacman.x;
 					pacman.y = blockNumber-1;
 					pacman.ydir = -1;
@@ -1817,14 +1444,14 @@ void FullMaze::PacMove(){
 	int x = pacman.x;
 	int y = pacman.y;
 	switch(NumToSurface(pacman.surface)){
-		case 'T':
+		case SURFACE_T:
 			if(maze[0].ReturnElement(x,y) == 1){
 				pacman.surface = prevSurface;
 				pacman.x = prevX;
 				pacman.y = prevY;
 			}
 			break;
-		case 'N':
+		case SURFACE_N:
 			if(maze[1].ReturnElement(x,y) == 1){
 				//pacSurface = prevSurface;
 				pacman.surface = prevSurface;
@@ -1832,7 +1459,7 @@ void FullMaze::PacMove(){
 				pacman.y = prevY;
 			}
 			break;
-		case 'W':
+		case SURFACE_W:
 			if(maze[2].ReturnElement(x,y) == 1){
 				//pacSurface = prevSurface;
 				pacman.surface = prevSurface;
@@ -1840,7 +1467,7 @@ void FullMaze::PacMove(){
 				pacman.y = prevY;
 			}
 			break;
-		case 'S':
+		case SURFACE_S:
 			if(maze[3].ReturnElement(x,y) == 1){
 				//pacSurface = prevSurface;
 				pacman.surface = prevSurface;
@@ -1849,7 +1476,7 @@ void FullMaze::PacMove(){
 			}
 			maze[3].Activate(pacman,curState);
 			break;
-		case 'E':
+		case SURFACE_E:
 			if(maze[4].ReturnElement(x,y) == 1){
 				//pacSurface = prevSurface;
 				pacman.surface = prevSurface;
@@ -1857,7 +1484,7 @@ void FullMaze::PacMove(){
 				pacman.y = prevY;
 			}
 			break;
-		case 'B':
+		case SURFACE_B:
 			if(maze[5].ReturnElement(x,y) == 1){
 				//pacSurface = prevSurface;
 				pacman.surface = prevSurface;
@@ -1871,7 +1498,7 @@ void FullMaze::PacMove(){
 
 	/* Update the pacman state in the surface maze */
 	switch(NumToSurface(pacman.surface)){
-		case 'T':
+		case SURFACE_T:
 			maze[0].Activate(pacman,curState);
 			if(maze[0].EatPerl(x,y)){perls++;}
 			if(maze[0].EatCherry(x,y)){cherries++;}
@@ -1879,7 +1506,7 @@ void FullMaze::PacMove(){
 				pacman.powerState = true;
 			}
 			break;
-		case 'N':
+		case SURFACE_N:
 			maze[1].Activate(pacman,curState);
 			if(maze[1].EatPerl(x,y)){perls++;};
 			if(maze[1].EatCherry(x,y)){cherries++;};
@@ -1887,7 +1514,7 @@ void FullMaze::PacMove(){
 				pacman.powerState = true;
 			}
 			break;
-		case 'W':
+		case SURFACE_W:
 			maze[2].Activate(pacman,curState);
 			if(maze[2].EatPerl(x,y)){perls++;};
 			if(maze[2].EatCherry(x,y)){cherries++;};
@@ -1895,7 +1522,7 @@ void FullMaze::PacMove(){
 				pacman.powerState = true;
 			}
 			break;
-		case 'S':
+		case SURFACE_S:
 			maze[3].Activate(pacman,curState);
 			if(maze[3].EatPerl(x,y)){perls++;};
 			if(maze[3].EatCherry(x,y)){cherries++;};
@@ -1903,7 +1530,7 @@ void FullMaze::PacMove(){
 				pacman.powerState = true;
 			}
 			break;
-		case 'E':
+		case SURFACE_E:
 			maze[4].Activate(pacman,curState);
 			if(maze[4].EatPerl(x,y)){perls++;};
 			if(maze[4].EatCherry(x,y)){cherries++;};
@@ -1911,7 +1538,7 @@ void FullMaze::PacMove(){
 				pacman.powerState = true;
 			}
 			break;
-		case 'B':
+		case SURFACE_B:
 			maze[5].Activate(pacman,curState);
 			if(maze[5].EatPerl(x,y)){perls++;};
 			if(maze[5].EatCherry(x,y)){cherries++;};

@@ -50,7 +50,6 @@ Menu::Menu() {
 
 /* ReadInput - read keyboard input and move the menu decision bar */
 int Menu::ReadInput(int input){
-	int state = 0;
 	switch(input){
 		case FSKEY_UP:
 			highlight_y -= 50;
@@ -82,7 +81,7 @@ int Menu::ReadInput(int input){
 }
 
 void Menu::DrawGhost(int xdir, int ydir, int color, int gx, int gy, bool eatable) const {
-	int x, y, c, x1, y1, x2, y2, i, j;
+	int x, y, x1, y1, x2, y2, i, j;
 	char curChar;
 	int hei = 14; // hei and wid are hard coded
 	int wid = 14;

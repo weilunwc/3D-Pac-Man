@@ -2,7 +2,6 @@
  * view.h - Defines functions and classes related to user's camera view
  */
 
-
 #ifndef VIEW_H
 #define VIEW_H
 
@@ -122,6 +121,7 @@ void View::CameraFollow(int surface, int x, int y){
 	
 	/* Get the coordinates */
 	double Px, Py, Pz;
+	Px = 0; Py = 0; Pz = 0;
 	// 0 T
 	if(surface == 0) {
 		Px = -blockNumber * 0.5 + x;

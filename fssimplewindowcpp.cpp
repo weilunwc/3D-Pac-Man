@@ -66,7 +66,8 @@ void FsOpenWindow(const FsOpenWindowOption &opt)
 	if(0!=windowOpen)
 	{
 		printf("Error! Window is already open.\n");
-		exit(1);
+		//exit(1);
+		return;
 	}
 
 	const int useDoubleBuffer=(int)opt.useDoubleBuffer;

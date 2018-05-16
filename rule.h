@@ -115,7 +115,7 @@ void Rule::Draw(int lpt) {
 
 void Rule::PacManMotion(int x, int y,int gx, int gy,int pixSize, int lpt){
 	//printf("Draw Pacman\n");
-	int dx, dy,  i ,j;
+	int dx, dy;
 	int x1, y1, x2, y2;
 	char curChar; char *pattern1;
 	int hei = 27; // hei and wid are har coded

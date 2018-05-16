@@ -1,5 +1,5 @@
 /*
- *	Draws the background page when playing
+ *	play.h - game logic and used as pacman environment
  */
 
 #ifndef PLAYIMAGE_H
@@ -15,41 +15,56 @@
 #include <stdio.h>
 #include "score.h"
 
+
+
 class Play{
 protected:
-    YsRawPngDecoder img;
+    /* Fancy Decoration */
+	YsRawPngDecoder img;
 	YsSoundPlayer musicPlayer;
-	YsSoundPlayer::SoundData pacman_death, scene, cherry, areyouready;
+	YsSoundPlayer::SoundData pacman_death, cherry, areyouready;
+
+	/* Maze Params*/
+	bool plot3d;
+	View ghostView, pacView;
 	FullMaze maze;
-    void DrawBackground();
+	FullMaze_3D maze_3d;
+	int ***mazeArray;
+	PacMan pacInfo;
+	vector<Ghost> ghostInfo;
+	time_t t0, dt, timeMax, timeLeft;
+	int lives, countDown, loopCount, totalPells;
+   	bool setCherry, setPower; 
+	/* Drawing functions */
+	void DrawBackground();
 	void DrawCountDown();
 	void DrawGameInfo();
 	void Draw2DMaze();
 	void Draw3DMaze();
-	time_t t0, dt, timeMax, timeLeft;
-	int lives, countDown, loopCount, totalPells;
-	bool exchangePlayers, pause;
+
+	bool exchangePlayers;
 	void SendMazeCommand(int key);
 	void Setup();
 	void Update3DMaze();	
 
-	bool plot3d;
-	FullMaze_3D maze_3d;
-	View ghostView, pacView;
-	
-	int ***mazeArray;
-	PacMan pacInfo;
-	vector<Ghost> ghostInfo;
 public:
     Play();
-	Play(bool plot3d);
+	Play(bool visualize, bool plot3d);
 	~Play(){musicPlayer.End();};
 
+	void Restart(bool exchangePlayers);
 	void Restart();
 	void Draw();
-	void Step(int key);
+	void Step(int pacCmd, int ghostCmd, int &pacReward, int &ghostReward);
+	void PacStep(int cmd, int &reward);
+	void GhostStep(int cmd, int &reward);
+
 	bool CheckEndCondition();
-	void PlayBackgroundMusic();
+	void Render();
+	bool CheckCountDown();
+	void PauseTime();
+	void UpdateTime();
+	void UpdateGame();
 };
 
 Play::Play(){
@@ -57,7 +72,15 @@ Play::Play(){
 	plot3d = false;
 }
 
-Play::Play(bool plot3d){
+/* Render - Assumes main function is only running game */
+void Play::Render(){
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Draw();
+	FsSwapBuffers();
+}
+
+Play::Play(bool visualize, bool plot3d){
+	if(visualize == true) FsOpenWindow(0, 100, 1600, 600, 1);
 	this->plot3d = plot3d;
 	Setup();
 	if(plot3d == true){
@@ -80,7 +103,7 @@ void Play::Setup(){
 	maze.SetMaze(); // load map
 	
 	/* Game parameters */
-	timeMax = 60;
+	timeMax = 10;
 	totalPells = 1883;	
 
 	/* Set up music */
@@ -91,9 +114,6 @@ void Play::Setup(){
 	if (YSOK != pacman_death.LoadWav("music/pacman_death.wav")){
 		printf("Error!  Cannot load pacman_death.wav!\n");
 	}
-	if (YSOK != scene.LoadWav("music/scene.wav")){
-		printf("Error!  Cannot load scene.wav!\n");
-	}
 	if (YSOK != cherry.LoadWav("music/pacman_eatfruit.wav")){
 		printf("Error!  Cannot load pacman_eatfruit.wav!\n");
 	}
@@ -103,100 +123,155 @@ void Play::Setup(){
 
 }
 
+void Play::PauseTime(){
+	t0 = time(NULL);
+}
+
+void Play::UpdateTime(){
+	time_t t = time(NULL);
+	dt += (t - t0);
+	t0 = time(NULL);
+	timeLeft = timeMax - dt;
+}
+
+/* Check if the game has started */
+bool Play::CheckCountDown(){
+	if(countDown <= 0) return true;
+	else{
+		time_t t = time(NULL);
+		countDown -= (t - t0);
+		t0 = time(NULL);
+	}
+	return false;
+}
+
 bool Play::CheckEndCondition(){
+	/* 
+	 * Game ends one condition is satisfied 
+	 * 1. times up 
+	 * 2. pacman out of lives
+	 * 3. eaten all the pells 
+	 */
 	if(dt >= timeMax || lives <= 0 || maze.perls == totalPells){
-		int perls = maze.perls;
-		if(exchangePlayers == true){
-			// game finished
-			return true;
-		}
-		else{
-			// switch players
-			//score.SetPlayer2(perls,lives,0,0,(int)totalTimeLeft);
-			//score.SetPlayer1(0,0,0,pac_eaten,2*(int)totalTimeLeft);
-			maze.Restart();
-			t0 = time(NULL);
-			dt = 0;
-			lives = 3;
-			timeLeft = timeMax;
-			loopCount = 0;
-			exchangePlayers = true;
-			countDown = 3;
-		}
+		return true;
 	}
 	return false;	
 }
 
-
-void Play::Step(int key){
-	time_t t;
-	if(pause == false && countDown <= 0){
-		/* Game running */
-	
-		/* Send commands to the pacman and ghost */
-		SendMazeCommand(key);
-		maze.PacMove();
-		int n = maze.cherries;
-		if(maze.cherries > n){
-			musicPlayer.Stop(scene);
-			musicPlayer.Stop(cherry);
-			musicPlayer.PlayOneShot(cherry);
-		}
-		maze.GhostMove(loopCount);
-		if(maze.CollisionDetect()){
-			musicPlayer.Stop(scene);
-			musicPlayer.Stop(pacman_death);
-			musicPlayer.PlayOneShot(pacman_death);
-			lives--;
-			//pac_eaten++;
-			//totalTimeLeft += timeLeft;
-			maze.SwitchGhost(0);
-		}
-		// update the time
-		t = time(NULL);
-		dt += (t - t0);
-		t0 = time(NULL);
-		timeLeft = timeMax - dt;
-		// all data is set here, display
-		if(loopCount == 50){
-			maze.SetCherry();
-		}
-		if(loopCount == 150){
-			maze.SetPowerPells();
-		}
-		loopCount++;
+void Play::UpdateGame(){
+	// all data is set here, display
+	if(dt > timeMax*(1.0/3.0) && setCherry == false){
+		maze.SetCherry();
+		setCherry = true;
 	}
-	/* Pause gameState */
-	else{
-		if(countDown <= 0){
-			// counting down
-			t0 = time(NULL);
-		}
-		else{
-			t = time(NULL);
-			countDown -= (t - t0);
-			t0 = time(NULL);
-		}
+	if(dt > timeMax*(2.0/3.0) && setPower == false){
+		maze.SetPowerPells();
+		setPower = true;
 	}
 	
 }
 
-void Play::PlayBackgroundMusic(){
-	musicPlayer.PlayBackground(scene);
+/* Sends commands in two player mode and updates game and score */
+void Play::Step(int pacCmd, int ghostCmd, int &pacReward, int &ghostReward){
+	/* Send command */
+	maze.ChangePacDirection(pacCmd);
+	maze.ChangeGhostDirection(ghostCmd);
+	
+	/* Update maze */
+	maze.PacMove();
+	maze.GhostMove(loopCount);
+	if(maze.CollisionDetect()){
+		musicPlayer.Stop(pacman_death);
+		musicPlayer.PlayOneShot(pacman_death);
+		lives--;
+		maze.SwitchGhost();
+	}
+	
+	UpdateTime();
+	UpdateGame();
+	loopCount++;
+	
+	/* Update score */
+	pacReward = 0;
+	ghostReward = 0;
+
 }
 
-void Play::Restart(){
+/* Sends commands for pacman player only and updates game and score */
+void Play::PacStep(int cmd, int &reward){
+	/* Send command */
+	maze.ChangePacDirection(cmd);
+	
+	/* Update maze */
+	maze.PacMove();
+	if(maze.CollisionDetect()){
+		musicPlayer.Stop(pacman_death);
+		musicPlayer.PlayOneShot(pacman_death);
+		lives--;
+	}
+	
+	UpdateTime();
+	UpdateGame();
+	loopCount++;
+	
+	/* Update score */
+	reward = 0;
+}
+
+/* Sends commands for ghost player only and updates game and score */
+void Play::GhostStep(int cmd, int &reward){
+	/* Send command */
+	maze.ChangeGhostDirection(cmd);
+	
+	/* Update maze */
+	maze.GhostMove(loopCount);
+	if(maze.CollisionDetect()){
+		musicPlayer.Stop(pacman_death);
+		musicPlayer.PlayOneShot(pacman_death);
+		lives--;
+	}
+	
+	UpdateTime();
+	UpdateGame();
+	loopCount++;
+	
+	/* Update score */
+	reward = 0;
+}
+
+/* Restart game */
+void Play::Restart(bool exchangePlayers){
 	musicPlayer.KeepPlaying();
 	maze.Restart();
+	this->exchangePlayers = exchangePlayers;
+	
 	t0 = time(NULL);
 	timeLeft = timeMax;
 	dt = 0;
 	lives = 3;
-	pause = false;
 	countDown = 3;
 	loopCount = 0;
-	exchangePlayers = false;
+	setPower = false;
+	setCherry = false;
+	/* Play start music */
+	musicPlayer.Stop(areyouready);
+	musicPlayer.PlayOneShot(areyouready);
+}
 
+/* Restart game */
+void Play::Restart(){
+	musicPlayer.KeepPlaying();
+	maze.Restart();
+	exchangePlayers = false;
+	
+	t0 = time(NULL);
+	timeLeft = timeMax;
+	dt = 0;
+	lives = 3;
+	countDown = 3;
+	loopCount = 0;
+	setPower = false;
+	setCherry = false;
 	/* Play start music */
 	musicPlayer.Stop(areyouready);
 	musicPlayer.PlayOneShot(areyouready);
@@ -206,16 +281,16 @@ void Play::SendMazeCommand(int key){
 	if(exchangePlayers == false){
 		switch(key){
 			case FSKEY_LEFT:
-				maze.ChangeDirection(1);
+				maze.ChangePacDirection(1);
 				break;
 			case FSKEY_UP:
-				maze.ChangeDirection(2);
+				maze.ChangePacDirection(2);
 				break;
 			case FSKEY_RIGHT:
-				maze.ChangeDirection(3);
+				maze.ChangePacDirection(3);
 				break;
 			case FSKEY_DOWN:
-				maze.ChangeDirection(4);
+				maze.ChangePacDirection(4);
 				break;
 			case FSKEY_A:
 				maze.ChangeGhostDirection(1);
@@ -230,23 +305,23 @@ void Play::SendMazeCommand(int key){
 				maze.ChangeGhostDirection(4);
 				break;
 			case FSKEY_1:
-				maze.SwitchGhost(0);
+				maze.SwitchGhost();
 				break;
 		}
 	}
 	else{
 		switch(key){
 			case FSKEY_A:
-				maze.ChangeDirection(1);
+				maze.ChangePacDirection(1);
 				break;
 			case FSKEY_W:
-				maze.ChangeDirection(2);
+				maze.ChangePacDirection(2);
 				break;
 			case FSKEY_D:
-				maze.ChangeDirection(3);
+				maze.ChangePacDirection(3);
 				break;
 			case FSKEY_S:
-				maze.ChangeDirection(4);
+				maze.ChangePacDirection(4);
 				break;
 			case FSKEY_LEFT:
 				maze.ChangeGhostDirection(1);
@@ -261,7 +336,7 @@ void Play::SendMazeCommand(int key){
 				maze.ChangeGhostDirection(4);
 				break;
 			case FSKEY_M:
-				maze.SwitchGhost(0);
+				maze.SwitchGhost();
 				break;
 		}
 	}
@@ -273,9 +348,7 @@ void Play::Draw2DMaze(){
 }
 
 void Play::Draw3DMaze(){
-
-	Update3DMaze();	
-
+	Update3DMaze();
 	int ghostNow = maze.ReturnGhostControl();
 	
 	/* Store the window size */	
@@ -370,7 +443,7 @@ void Play::DrawGameInfo(){
 
 	string timeHeader = "Time Left: ";
 	char displayTime[1024];
-	IntToChar(timeLeft,timeHeader, nullString, displayTime);
+	IntToChar(timeLeft, timeHeader, nullString, displayTime);
 
 	string livesHeader = "Lives: ";
 	char displayLives[1024];
@@ -397,16 +470,17 @@ void Play::Draw(){
 	}
 }
 
+/* Read data from 2d Maze and load to 3d maze */
 void Play::Update3DMaze(){
 	maze.ReturnMaze(mazeArray);
-	maze.ReturnPacman(&pacInfo);
-	maze.ReturnGhost(&ghostInfo);
+	maze.ReturnPacman(pacInfo);
+	maze.ReturnGhost(ghostInfo);
 
+	/* Load data to 3d maze */
 	maze_3d.SetMaze(mazeArray);
 	maze_3d.SetCursor(pacInfo);
 	maze_3d.SetGhost(&ghostInfo);
 }
-
 
 
 #endif
