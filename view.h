@@ -6,6 +6,8 @@
 #define VIEW_H
 
 #include "fssimplewindow.h"
+#include "maze.h"
+using namespace std;
 
 class CameraObject{
 public:
@@ -123,37 +125,37 @@ void View::CameraFollow(int surface, int x, int y){
 	double Px, Py, Pz;
 	Px = 0; Py = 0; Pz = 0;
 	// 0 T
-	if(surface == 0) {
+	if(surface == SURFACE_T) {
 		Px = -blockNumber * 0.5 + x;
 		Py = blockNumber * 0.5;
 		Pz = -blockNumber * 0.5 + y;
 	}
 	// 1 N
-	else if (surface == 1) {
+	else if (surface == SURFACE_N) {
 		Px = blockNumber * 0.5 - x;
 		Py = blockNumber * 0.5 - y;
 		Pz = -blockNumber * 0.5;
 	}
 	// 2 W
-	else if (surface == 2) {
+	else if (surface == SURFACE_W) {
 		Px = -blockNumber * 0.5;
 		Py = blockNumber * 0.5 - y;
 		Pz = -blockNumber * 0.5 + x;
 	}
 	// 3 S
-	else if (surface == 3) {
+	else if (surface == SURFACE_S) {
 		Px = -blockNumber * 0.5 + x;
 		Py = blockNumber * 0.5 - y;
 		Pz = blockNumber * 0.5;
 	}
 	// 4 E
-	else if (surface == 4) {
+	else if (surface == SURFACE_E) {
 		Px = blockNumber * 0.5;
 		Py = blockNumber * 0.5 - y;
 		Pz = blockNumber * 0.5 - x;
 	}
 	// 5 B
-	else if (surface == 5) {
+	else if (surface == SURFACE_B) {
 		Px = -blockNumber * 0.5 + x;
 		Py = -blockNumber * 0.5;
 		Pz = blockNumber * 0.5 - y;

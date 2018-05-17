@@ -103,7 +103,7 @@ void Play::Setup(){
 	maze.SetMaze(); // load map
 	
 	/* Game parameters */
-	timeMax = 10;
+	timeMax = 60;
 	totalPells = 1883;	
 
 	/* Set up music */
@@ -152,7 +152,7 @@ bool Play::CheckEndCondition(){
 	 * 2. pacman out of lives
 	 * 3. eaten all the pells 
 	 */
-	if(dt >= timeMax || lives <= 0 || maze.perls == totalPells){
+	if(dt >= timeMax || lives <= 0 || maze.pells == totalPells){
 		return true;
 	}
 	return false;	
@@ -165,7 +165,7 @@ void Play::UpdateGame(){
 		setCherry = true;
 	}
 	if(dt > timeMax*(2.0/3.0) && setPower == false){
-		maze.SetPowerPells();
+		maze.SetSuperPells();
 		setPower = true;
 	}
 	

@@ -1,6 +1,9 @@
 #ifndef MAZE3D_H
 #define MAZE3D_H
 
+#include "maze.h"
+using namespace std;
+
 extern int blockSize_3D; // Giada's Modification
 extern const int blockNumber;
 extern double myPi;
@@ -50,8 +53,8 @@ class Maze_3D{
     void SetMaze(int,int,int);
     void SetOrientation(char);
     void Draw3D();
-    void DrawPerl(double,double,double);
-    void DrawSuperPerl(double,double,double);
+    void DrawPell(double,double,double);
+    void DrawSuperPell(double,double,double);
     void DrawCherry(double,double,double);
     void DrawPacMan(double,double,double);
     void DrawGhost(double,double,double,int,int);
@@ -60,8 +63,8 @@ class Maze_3D{
     void Deactivate();
     const int ReturnElement(int,int)const;
 
-    char patternPerl[9];
-    char patternSuperPerl[196];
+    char patternPell[9];
+    char patternSuperPell[196];
     char patternPacMan[196];
     char patternCherry[196];
     char patternGhostLeft[196];
@@ -94,13 +97,13 @@ Maze_3D::~Maze_3D(){
 
 void Maze_3D::SetPatterns() {
 
-  char pPerl[] =
+  char pPell[] =
   {
     "..."
     ".0."
     "..."
   };
-  char pSuperPerl[] =
+  char pSuperPell[] =
   {
     ".............."
     ".............."
@@ -237,11 +240,11 @@ void Maze_3D::SetPatterns() {
 
   int i;
   for(i=0; i<9; i++) {
-    patternPerl[i] = pPerl[i];
+    patternPell[i] = pPell[i];
   }
 
   for(i=0; i<196; i++) {
-    patternSuperPerl[i]       = pSuperPerl[i];
+    patternSuperPell[i]       = pSuperPell[i];
     patternPacMan[i]          = pPacMan[i];
     patternCherry[i]          = pCherry[i];
     patternGhostUp[i]         = pGhostUp[i];
@@ -442,10 +445,10 @@ void Maze_3D::Draw3D()
                        origin3.z + nextX.z*blockSize_3D*i     + nextY.z*blockSize_3D*(j+1));
             glEnd();
           }
-          else if (maze[i][j] == 0) DrawPerl(x,y,z);
-          else if (maze[i][j] == 3) DrawSuperPerl(x,y,z);
-          else if (maze[i][j] == 2) DrawCherry(x,y,z);
-          else if (maze[i][j] == -1) {
+          else if (maze[i][j] == MAZE_PELL) DrawPell(x,y,z);
+          else if (maze[i][j] == MAZE_SUPERPELL) DrawSuperPell(x,y,z);
+          else if (maze[i][j] == MAZE_CHERRY) DrawCherry(x,y,z);
+          else if (maze[i][j] == MAZE_WALL) {
             glColor3ub(0,0,0);
             glBegin(GL_QUADS);
             glVertex3d(origin3.x + nextX.x*blockSize_3D*i     + nextY.x*blockSize_3D*j,
@@ -499,13 +502,13 @@ void Maze_3D::Draw3D()
     }
 }
 
-void Maze_3D::DrawPerl(double drawX, double drawY, double drawZ) {
+void Maze_3D::DrawPell(double drawX, double drawY, double drawZ) {
 	double x_2D, y_2D;
   double unit = 2.333334;
 	for (y_2D = 0.0; y_2D < blockSize_3D; y_2D+=unit) {
 		for (x_2D = 0.0; x_2D < blockSize_3D; x_2D+=unit) {
       int bit = (int)((x_2D/unit)+((y_2D/unit)*3));
-			if (patternPerl[bit] == '0') glColor3ub(255,255,255);
+			if (patternPell[bit] == '0') glColor3ub(255,255,255);
       else glColor3ub(0,0,0);
       glBegin(GL_QUADS);
       glVertex3d( drawX + (x_2D  )*nextX.x + (y_2D  )*nextY.x,
@@ -525,13 +528,13 @@ void Maze_3D::DrawPerl(double drawX, double drawY, double drawZ) {
 	}
 }
 
-void Maze_3D::DrawSuperPerl(double drawX, double drawY, double drawZ) {
+void Maze_3D::DrawSuperPell(double drawX, double drawY, double drawZ) {
 	double x_2D, y_2D;
 	for (y_2D = 0.0; y_2D < blockSize_3D; y_2D+=0.5) {
 		for (x_2D = 0.0; x_2D < blockSize_3D; x_2D+=0.5) {
       int bit = (int)((x_2D*2)+((y_2D*2)*14));
-			if      (patternSuperPerl[bit] == '0') glColor3ub(255,255,50);
-      else if (patternSuperPerl[bit] == '1') glColor3ub(255,155,50);
+			if      (patternSuperPell[bit] == '0') glColor3ub(255,255,50);
+      else if (patternSuperPell[bit] == '1') glColor3ub(255,155,50);
       else glColor3ub(0,0,0);
       glBegin(GL_QUADS);
       glVertex3d( drawX + (x_2D    )*nextX.x + (y_2D    )*nextY.x,

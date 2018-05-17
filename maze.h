@@ -1,10 +1,12 @@
-/* This file is the header file for the maze class, each surface of the maze
- * if another subclass, the fullmaze class contains six surfaces
+/* 
+ * maze.h 
+ * The header file for the maze class, each surface of the maze
+ * in another subclass, the fullmaze class contains six surfaces
  * This program also alows users to design their own maze by moving the pacman
  * to design the maze structure, and also enabeles prototype experimentation
  * of the transfer between different surfaces
  * Wei Lun William Chen 2017.11.19
- * */
+ */
 #ifndef MAZE_H
 #define MAZE_H
 
@@ -47,6 +49,17 @@ enum
 	GHOST_NONE
 };
 
+/* Direction */
+enum
+{
+	DIR_UP,
+	DIR_DOWN,
+	DIR_LEFT,
+	DIR_RIGHT,
+	DIR_STOP
+};
+
+
 /* Surface */
 enum
 {
@@ -57,6 +70,17 @@ enum
 	SURFACE_E,
 	SURFACE_B,
 };
+
+/* Maze Element */
+enum
+{
+	MAZE_PELL,
+	MAZE_EMPTY,
+	MAZE_WALL,
+	MAZE_CHERRY,
+	MAZE_SUPERPELL
+};
+
 
 /* the pacman x,y coordinates*/
 typedef struct CoordStruct{
@@ -80,6 +104,7 @@ typedef struct PacmManStruct{
 	int prevX,prevY;
 	int surface;
 	int xdir,ydir;
+	int dir;
 	bool powerState;
 }PacMan;
 
@@ -92,9 +117,7 @@ typedef struct ColorStruct{
 }Color;
 
 
-/* A maze on a single surface, uses an array to represent
- * each block
- */
+/* A maze on a single surface, uses an array to representeach block */
 class Maze{
 protected:
 	int **maze;
@@ -103,7 +126,6 @@ protected:
 	Coord cherry;
 	vector<bool> ghostState;
 	Coord origin; // the (0,0) point on the global coordinates
-	char orientation;
 	Color baseColor; // R,G,B
 
 public:
@@ -111,18 +133,18 @@ public:
 	~Maze();
 	void SetMaze(int,int,int); // set the maze array
 	void SetCherry();
-	void SetPowerPells();
+	void SetSuperPells();
 	void SetOrientation(char); // set the maze's relative position to other surfaces
 	void Draw();
 	void DrawGhost(int,int);
 	void Print();
-	bool EatPerl(int,int);
+	bool EatPell(int,int);
 	bool EatCherry(int,int);
-	bool EatPowerPell(int,int);
+	bool EatSuperPell(int,int);
 	void Activate(PacMan,int);// changes pacman coordinates and state
 	void Deactivate(); // turns down the pacman drawing
 	const int ReturnElement(int,int)const; // return the element of a coordinate
-	int ReturnPerls();
+	int ReturnPells();
 };
 
 Maze::Maze(){
@@ -149,71 +171,72 @@ Maze::~Maze(){
 void Maze::SetCherry(){
 	int x = rand()%blockNumber;
 	int y = rand()%blockNumber;
-	while(maze[x][y] == 1){
+	while(maze[x][y] == MAZE_WALL){
 		x = rand()%blockNumber;
 		y = rand()%blockNumber;
 	}
 	cherry.x = x;
 	cherry.y = y;
-	maze[x][y] = 2;
+	maze[x][y] = MAZE_CHERRY;
 }
 
-void Maze::SetPowerPells(){
+void Maze::SetSuperPells(){
 	int x = rand()%blockNumber;
 	int y = rand()%blockNumber;
-	while(maze[x][y] == 1){
+	while(maze[x][y] == MAZE_WALL){
 		x = rand()%blockNumber;
 		y = rand()%blockNumber;
 	}
-	maze[x][y] = 3;
+	maze[x][y] = MAZE_SUPERPELL;
 }
 
-bool Maze::EatPerl(int i,int j){
+bool Maze::EatPell(int i,int j){
 
-	if(maze[i][j] == 0){
-		maze[i][j] = -1;
+	if(maze[i][j] == MAZE_PELL){
+		maze[i][j] = MAZE_EMPTY;
 		return true;
 	}
 	return false;
 }
 bool Maze::EatCherry(int i,int j){
 
-	if(maze[i][j] == 2){
-		maze[i][j] = -1;
+	if(maze[i][j] == MAZE_CHERRY){
+		maze[i][j] = MAZE_EMPTY;
 		return true;
 	}
 	return false;
 }
 
 
-bool Maze::EatPowerPell(int i,int j){
+bool Maze::EatSuperPell(int i,int j){
 
-	if(maze[i][j] == 3){
-		maze[i][j] = -1;
+	if(maze[i][j] == MAZE_SUPERPELL){
+		maze[i][j] = MAZE_EMPTY;
 		return true;
 	}
 	return false;
 }
 
 
-int Maze::ReturnPerls(){
-	int perls = 0;
+int Maze::ReturnPells(){
+	int pells = 0;
 	for(int i = 0;i < blockNumber;i++){
 		for(int j = 0;j < blockNumber;j++){
 			if(maze[i][j] == -1){
-				perls++;
+				pells++;
 			}
 		}
 	}
-	return perls;
+	return pells;
 }
 
+/* Build the maze */
 void Maze::SetMaze(int i,int j,int input){
-	maze[i][j] = input;
+	if(input == 0) maze[i][j] = MAZE_PELL;
+	else maze[i][j] = MAZE_WALL;
 }
 
 void Maze::SetOrientation(char orient){
-	orientation = orient;
 	switch(orient){
 		case SURFACE_T:
 			baseColor.r = 200;
@@ -265,6 +288,7 @@ const int Maze::ReturnElement(int i,int j)const{
 	return maze[i][j];
 }
 
+/* Print the maze components */
 void Maze::Print(){
 	for(int i = 0;i < blockNumber;i++){
 		for(int j = 0;j < blockNumber;j++){
@@ -301,7 +325,9 @@ void Maze::Draw(){
 		for(int j = 0;j < blockNumber;j++){
 			int x = blockSize_2D*i;
 			int y = blockSize_2D*j;
-			if(maze[i][j] == 1){
+			
+			/* Draw background */
+			if(maze[i][j] == MAZE_WALL){
 				glColor3ub(baseColor.r,baseColor.g,baseColor.b);
 			}
 			else{
@@ -314,8 +340,8 @@ void Maze::Draw(){
 			glVertex2i(origin.x + x            ,origin.y + y + blockSize_2D);
 			glEnd();
 
-			if(maze[i][j] == 0){
-				// draw the perls
+			if(maze[i][j] == MAZE_PELL){
+				// draw the pells
 				double centerx = origin.x + x + blockSize_2D/2;
 				double centery = origin.y + y + blockSize_2D/2;
 				double r = blockSize_2D/2.0 - 1.0;
@@ -329,7 +355,7 @@ void Maze::Draw(){
 				}
 				glEnd();
 			}
-			if(maze[i][j] == 2){
+			if(maze[i][j] == MAZE_CHERRY){
 				// draw the cherry
 				double centerx = origin.x + x + blockSize_2D/2;
 				double centery = origin.y + y + blockSize_2D/2;
@@ -344,8 +370,8 @@ void Maze::Draw(){
 				}
 				glEnd();
 			}
-			if(maze[i][j] == 3){
-				// draw the power pells
+			if(maze[i][j] == MAZE_SUPERPELL){
+				// draw the super pells
 				double centerx = origin.x + x + blockSize_2D/2;
 				double centery = origin.y + y + blockSize_2D/2;
 				double r = blockSize_2D/2.0 - 1.0;
@@ -409,7 +435,7 @@ private:
 public:
 	PacMan pacman;
 	int ghost_eaten;
-	int perls;
+	int pells;
 	int cherries;
 	FullMaze(){};
 	void Draw();
@@ -425,42 +451,39 @@ public:
 	bool CollisionDetect();
 	void SetMaze();
 	void SetCherry();
-	void SetPowerPells();
-	//void EatPerl(int,int,int);
+	void SetSuperPells();
 	const void ReturnMaze(int***)const;
 	void ReturnPacman(PacMan &pacInfo);
 	void ReturnGhost(vector<Ghost> &ghostInfo);
-	int ReturnPerls();
+	int ReturnPells();
 	void ChangeIndexToDir(int);
 	void SwitchGhost();
-	int surfaceToNum(char);
-	char NumToSurface(int);
 	void GhostChase(int,int,int);
 };
 
 
 void FullMaze::Restart(){
 	SetMaze();
-	maze[0].SetOrientation(SURFACE_T);
-	maze[1].SetOrientation(SURFACE_N);
-	maze[2].SetOrientation(SURFACE_W);
-	maze[3].SetOrientation(SURFACE_S);
-	maze[4].SetOrientation(SURFACE_E);
-	maze[5].SetOrientation(SURFACE_B);
+	maze[SURFACE_T].SetOrientation(SURFACE_T);
+	maze[SURFACE_N].SetOrientation(SURFACE_N);
+	maze[SURFACE_W].SetOrientation(SURFACE_W);
+	maze[SURFACE_S].SetOrientation(SURFACE_S);
+	maze[SURFACE_E].SetOrientation(SURFACE_E);
+	maze[SURFACE_B].SetOrientation(SURFACE_B);
 	//pacSurface = SURFACE_S;
 	ghost_eaten = 0;
 	cherries = 0;
-	pacman.surface = 3;
+	pacman.surface = SURFACE_S;
 	curState = 1;
 	pacman.x = 8;
 	pacman.y = 12;
 	pacman.prevX = 8;
 	pacman.prevY = 12;
 	pacman.powerState = false;
-	perls = 0;
+	pells = 0;
 	pacman.xdir = 0;
 	pacman.ydir = 0;
-	maze[3].Activate(pacman,curState);
+	maze[SURFACE_S].Activate(pacman, curState);
 	ghostLives = ghostNumber;
 	ghost.resize(ghostLives);
 	int j = 0;
@@ -490,6 +513,46 @@ void FullMaze::Restart(){
 	}
 }
 
+/* Restore - when pacman dies, return to initial location */
+void FullMaze::Restore(){
+	pacman.surface = SURFACE_S;
+	curState = 1;
+	pacman.x = 8;
+	pacman.y = 12;
+	pacman.xdir = 0;
+	pacman.ydir = 0;
+	for(int i = 0;i < 6;i++){
+		maze[i].Deactivate();
+	}
+	maze[SURFACE_S].Activate(pacman,curState);
+	ghost.resize(ghostLives);
+	int j = 0;
+	int k = 0;
+	int s = 1;
+	ghostControl = ghostLives%6;
+	for(int i = 0;i < ghostLives;i++){
+		if(i != ghostControl){
+			RandomDirection(i);
+		}
+		else{
+			ghost[i].xdir = 0;
+			ghost[i].ydir = 0;
+		}
+		ghost[i].surface = s;
+		ghost[i].x = k+11;
+		ghost[i].y = j+11;
+		ghost[i].prevX = k+11;
+		ghost[i].prevY = j+11;
+		k++;
+		j++;
+		if(k >= 2){
+			s++;
+			k = 0;
+			j = 0;
+
+		}
+	}
+}
 
 void FullMaze::ChangeIndexToDir(int i) {
 	switch (ghost[i].dirIndex) {
@@ -513,12 +576,12 @@ void FullMaze::ChangeIndexToDir(int i) {
 }
 
 
-int FullMaze::ReturnPerls(){
-	int perls = 0;
+int FullMaze::ReturnPells(){
+	int pells = 0;
 	for(int i = 0;i < 6;i++){
-		perls += maze[i].ReturnPerls();
+		pells += maze[i].ReturnPells();
 	}
-	return perls;
+	return pells;
 }
 
 /* Simple heuristic AI for automatic ghost chase */
@@ -550,94 +613,18 @@ void FullMaze::SetCherry(){
 }
 
 /* Place PowerPells */
-void FullMaze::SetPowerPells(){
+void FullMaze::SetSuperPells(){
 	for(int i = 0;i < 6;i++){
-		maze[i].SetPowerPells();
+		maze[i].SetSuperPells();
 	}
 }
 
-
+/* returns the player controlled ghost index */
 int FullMaze::ReturnGhostControl(){
 	return ghostControl;
 }
 
-void FullMaze::Restore(){
-	
-	pacman.surface = 3;
-	curState = 1;
-	pacman.x = 8;
-	pacman.y = 12;
-	pacman.xdir = 0;
-	pacman.ydir = 0;
-	for(int i = 0;i < 6;i++){
-		maze[i].Deactivate();
-	}
-	maze[3].Activate(pacman,curState);
-	ghost.resize(ghostLives);
-	int j = 0;
-	int k = 0;
-	int s = 1;
-	ghostControl = ghostLives%6;
-	for(int i = 0;i < ghostLives;i++){
-		if(i != ghostControl){
-			RandomDirection(i);
-		}
-		else{
-			ghost[i].xdir = 0;
-			ghost[i].ydir = 0;
-		}
-		ghost[i].surface = s;
-		ghost[i].x = k+11;
-		ghost[i].y = j+11;
-		ghost[i].prevX = k+11;
-		ghost[i].prevY = j+11;
-		k++;
-		j++;
-		if(k >= 2){
-			s++;
-			k = 0;
-			j = 0;
 
-		}
-	}
-}
-int FullMaze::surfaceToNum(char sur){
-	switch(sur){
-		case SURFACE_T:
-			return 0;
-		case SURFACE_N:
-			return 1;
-		case SURFACE_W:
-			return 2;
-		case SURFACE_S:
-			return 3;
-		case SURFACE_E:
-			return 4;
-		case SURFACE_B:
-			return 5;
-		default:
-			return 3;
-	}
-}
-
-char FullMaze::NumToSurface(int num){
-	switch(num){
-		case 0:
-			return SURFACE_T;
-		case 1:
-			return SURFACE_N;
-		case 2:
-			return SURFACE_W;
-		case 3:
-			return SURFACE_S;
-		case 4:
-			return SURFACE_E;
-		case 5:
-			return SURFACE_B;
-		default:
-			return SURFACE_S;
-	}
-}
 
 /* Check if there is a collision between ghost and pacman */
 bool FullMaze::CollisionDetect(){
@@ -702,8 +689,6 @@ bool FullMaze::CollisionDetect(){
 	return false;
 }
 
-
-
 void FullMaze::Draw(){
 	for(int i = 0;i < 6;i++){
 		maze[i].Draw();
@@ -765,20 +750,19 @@ void FullMaze::SetMaze(){
 
 	fstream input;
 	string buffer;
-	input.open("maps/map25.txt",ios::in);
+	input.open("maps/mapfull25.txt",ios::in);
 	for(int i = 0;i < 6;i++){
 		for(int j = 0;j < blockNumber;j++){
 			input >> buffer;
 			for(int k = 0;k < blockNumber;k++){
 				maze[i].SetMaze(k, j, buffer[k] - '0');
 			}
-			//cout << buffer << endl;
 		}
-		//cout << endl;
 	}
 	input.close();
 }
 
+/* Print the full maze */
 void FullMaze::Print(){
 	for(int i = 0;i < 6;i++){
 		maze[i].Print();
@@ -800,19 +784,22 @@ const void FullMaze::ReturnMaze(int *** output)const{
 void FullMaze::ChangePacDirection(int dir){
 	switch(dir){
 		case PAC_LEFT:
+			pacman.dir = DIR_LEFT;
 			pacman.xdir = -1;
 			pacman.ydir = 0;
 			break;
 		case PAC_UP:
-
+			pacman.dir = DIR_UP;
 			pacman.ydir = -1;
 			pacman.xdir = 0;
 			break;
 		case PAC_RIGHT:
+			pacman.dir = DIR_RIGHT;
 			pacman.xdir = 1;
 			pacman.ydir = 0;
 			break;
 		case PAC_DOWN:
+			pacman.dir = DIR_DOWN;
 			pacman.xdir = 0;
 			pacman.ydir = 1;
 			break;
@@ -871,7 +858,7 @@ void FullMaze::SwitchGhost(){
 	}
 }
 
-/* Literally move the ghost */
+/* move the ghost */
 void FullMaze::GhostMove(int loopCount) {
 	int n = ghost.size();
 	int prevX, prevY, prevSurface;
@@ -882,7 +869,9 @@ void FullMaze::GhostMove(int loopCount) {
 		prevX = ghost[i].x;
 		prevY = ghost[i].y;
 		if (i != ghostControl){
-			if((loopCount*3) % 4== 0){
+			/* automatic ghost */
+			if((loopCount*3) % 4 == 0){
+				// to slow down the ghost, speed 3/4 
 				continue;
 			}
 			switch (ghost[i].dirIndex)
@@ -1202,7 +1191,7 @@ void FullMaze::GhostMove(int loopCount) {
 		int x = ghost[i].x;
 		int y = ghost[i].y;
 		int surface = ghost[i].surface;
-		if (maze[surface].ReturnElement(x, y) == 1) {
+		if (maze[surface].ReturnElement(x, y) == MAZE_WALL) {
 			ghost[i].x = prevX;
 			ghost[i].y = prevY;
 			ghost[i].surface = prevSurface;
@@ -1231,51 +1220,57 @@ void FullMaze::GhostMove(int loopCount) {
 	}
 }
 
+/* Move pacman */
 void FullMaze::PacMove(){
+	/* Store the current state to prevent bumping to walls */
 	int prevX, prevY, prevSurface;
+	int x, y, surface;
 	prevX = pacman.x;
 	prevY = pacman.y;
 	pacman.prevX = pacman.x;
 	pacman.prevY = pacman.y;
 	prevSurface = pacman.surface;
+
+	surface = pacman.surface;
 	if(pacman.xdir < 0){
+		
 		pacman.x--;
 		if(pacman.x < 0){
-			switch(NumToSurface(pacman.surface)){
+			switch(surface){
 				case SURFACE_T:
-					maze[0].Deactivate();
-					pacman.surface = surfaceToNum(SURFACE_W);
+					maze[surface].Deactivate();
+					pacman.surface = SURFACE_W;
 					pacman.x = pacman.y;
 					pacman.y = 0;
 					pacman.xdir = 0;
 					pacman.ydir = 1;
 					break;
 				case SURFACE_N:
-					maze[1].Deactivate();
-					pacman.surface = surfaceToNum(SURFACE_E);
+					maze[surface].Deactivate();
+					pacman.surface = SURFACE_E;
 					pacman.x = blockNumber-1;
 					break;
 				case SURFACE_W:
-					maze[2].Deactivate();
-					pacman.surface = surfaceToNum(SURFACE_N);
+					maze[surface].Deactivate();
+					pacman.surface = SURFACE_N;
 					//pacman.surface = SURFACE_N;
 					pacman.x = blockNumber-1;
 					break;
 				case SURFACE_S:
-					maze[3].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_W;
-					pacman.surface = surfaceToNum(SURFACE_W);
+					pacman.surface = SURFACE_W;
 					pacman.x = blockNumber-1;
 					break;
 				case SURFACE_E:
-					maze[4].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_S;
-					pacman.surface = surfaceToNum(SURFACE_S);
+					pacman.surface = SURFACE_S;
 					pacman.x = blockNumber-1;
 					break;
 				case SURFACE_B:
-					maze[5].Deactivate();
-					pacman.surface = surfaceToNum(SURFACE_W);
+					maze[surface].Deactivate();
+					pacman.surface = SURFACE_W;
 					//pacSurface = SURFACE_W;
 					pacman.x = blockNumber-1 - pacman.y;
 					pacman.y = blockNumber-1;
@@ -1288,51 +1283,51 @@ void FullMaze::PacMove(){
 	else if(pacman.ydir < 0){
 		pacman.y--;
 		if(pacman.y < 0){
-			switch(NumToSurface(pacman.surface)){
+			switch(pacman.surface){
 				case SURFACE_T:
-					maze[0].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_N;
-					pacman.surface = surfaceToNum(SURFACE_N);
+					pacman.surface = SURFACE_N;
 					pacman.x = blockNumber-1 - pacman.x;
 					pacman.y = 0;
 					pacman.ydir = 1;
 					break;
 				case SURFACE_N:
-					maze[1].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_T;
-					pacman.surface = surfaceToNum(SURFACE_T);
+					pacman.surface = SURFACE_T;
 					pacman.x = blockNumber-1 - pacman.x;
 					pacman.y = 0;
 					pacman.ydir = 1;
 					break;
 				case SURFACE_W:
-					maze[2].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_T;
-					pacman.surface = surfaceToNum(SURFACE_T);
+					pacman.surface = SURFACE_T;
 					pacman.y = pacman.x;
 					pacman.x = 0;
 					pacman.ydir = 0;
 					pacman.xdir = 1;
 					break;
 				case SURFACE_S:
-					maze[3].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_T;
-					pacman.surface = surfaceToNum(SURFACE_T);
+					pacman.surface = SURFACE_T;
 					pacman.y = blockNumber-1;
 					break;
 				case SURFACE_E:
-					maze[4].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_T;
-					pacman.surface = surfaceToNum(SURFACE_T);
+					pacman.surface = SURFACE_T;
 					pacman.y= blockNumber-1 - pacman.x;
 					pacman.x = blockNumber-1;
 					pacman.xdir = -1;
 					pacman.ydir = 0;
 					break;
 				case SURFACE_B:
-					maze[5].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_S;
-					pacman.surface = surfaceToNum(SURFACE_S);
+					pacman.surface = SURFACE_S;
 					pacman.y = blockNumber-1;
 					break;
 			}
@@ -1341,44 +1336,44 @@ void FullMaze::PacMove(){
 	else if(pacman.xdir > 0){
 		pacman.x++;
 		if(pacman.x >= blockNumber){
-			switch(NumToSurface(pacman.surface)){
+			switch(pacman.surface){
 				case SURFACE_T:
-					maze[0].Deactivate();
-					pacman.surface = surfaceToNum(SURFACE_E);
+					maze[surface].Deactivate();
+					pacman.surface = SURFACE_E;
 					//pacSurface = SURFACE_E;
-					pacman.x = blockNumber-1 - pacman.y;
+					pacman.x = blockNumber - 1 - pacman.y;
 					pacman.y = 0;
 					pacman.xdir = 0;
 					pacman.ydir = 1;
 					break;
 				case SURFACE_N:
-					maze[1].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_W;
-					pacman.surface = surfaceToNum(SURFACE_W);
+					pacman.surface = SURFACE_W;
 					pacman.x = 0;
 					break;
 				case SURFACE_W:
-					maze[2].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_S;
-					pacman.surface = surfaceToNum(SURFACE_S);
+					pacman.surface = SURFACE_S;
 					pacman.x = 0;
 					break;
 				case SURFACE_S:
-					maze[3].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_E;
-					pacman.surface = surfaceToNum(SURFACE_E);
+					pacman.surface = SURFACE_E;
 					pacman.x = 0;
 					break;
 				case SURFACE_E:
-					maze[4].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_N;
-					pacman.surface = surfaceToNum(SURFACE_N);
+					pacman.surface = SURFACE_N;
 					pacman.x = 0;
 					break;
 				case SURFACE_B:
-					maze[5].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_E;
-					pacman.surface = surfaceToNum(SURFACE_E);
+					pacman.surface = SURFACE_E;
 					pacman.x = pacman.y;
 					pacman.y = blockNumber-1;
 					pacman.xdir = 0;
@@ -1390,40 +1385,40 @@ void FullMaze::PacMove(){
 	else{
 		pacman.y++;
 		if(pacman.y >= blockNumber){
-			switch(NumToSurface(pacman.surface)){
+			switch(pacman.surface){
 				case SURFACE_T:
-					maze[0].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_S;
-					pacman.surface = surfaceToNum(SURFACE_S);
+					pacman.surface = SURFACE_S;
 					pacman.y = 0;
 					break;
 				case SURFACE_N:
-					maze[1].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_B;
-					pacman.surface = surfaceToNum(SURFACE_B);
+					pacman.surface = SURFACE_B;
 					pacman.x = blockNumber-1-pacman.x;
 					pacman.y = blockNumber-1;
 					pacman.ydir = -1;
 					break;
 				case SURFACE_W:
-					maze[2].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_B;
-					pacman.surface = surfaceToNum(SURFACE_B);
+					pacman.surface = SURFACE_B;
 					pacman.y = blockNumber-1-pacman.x;
 					pacman.x = 0;
 					pacman.ydir = 0;
 					pacman.xdir = 1;
 					break;
 				case SURFACE_S:
-					maze[3].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_B;
-					pacman.surface = surfaceToNum(SURFACE_B);
+					pacman.surface = SURFACE_B;
 					pacman.y = 0;
 					break;
 				case SURFACE_E:
-					maze[4].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_B;
-					pacman.surface = surfaceToNum(SURFACE_B);
+					pacman.surface = SURFACE_B;
 					pacman.y = pacman.x;
 					pacman.x = blockNumber-1;
 					pacman.ydir = 0;
@@ -1431,121 +1426,34 @@ void FullMaze::PacMove(){
 					//bool powerState;
 					break;
 				case SURFACE_B:
-					maze[5].Deactivate();
+					maze[surface].Deactivate();
 					//pacSurface = SURFACE_N;
-					pacman.surface = surfaceToNum(SURFACE_N);
-					pacman.x = blockNumber-1 - pacman.x;
-					pacman.y = blockNumber-1;
+					pacman.surface = SURFACE_N;
+					pacman.x = blockNumber - 1 - pacman.x;
+					pacman.y = blockNumber - 1;
 					pacman.ydir = -1;
 					break;
 			}
 		}
 	}
-	int x = pacman.x;
-	int y = pacman.y;
-	switch(NumToSurface(pacman.surface)){
-		case SURFACE_T:
-			if(maze[0].ReturnElement(x,y) == 1){
-				pacman.surface = prevSurface;
-				pacman.x = prevX;
-				pacman.y = prevY;
-			}
-			break;
-		case SURFACE_N:
-			if(maze[1].ReturnElement(x,y) == 1){
-				//pacSurface = prevSurface;
-				pacman.surface = prevSurface;
-				pacman.x = prevX;
-				pacman.y = prevY;
-			}
-			break;
-		case SURFACE_W:
-			if(maze[2].ReturnElement(x,y) == 1){
-				//pacSurface = prevSurface;
-				pacman.surface = prevSurface;
-				pacman.x = prevX;
-				pacman.y = prevY;
-			}
-			break;
-		case SURFACE_S:
-			if(maze[3].ReturnElement(x,y) == 1){
-				//pacSurface = prevSurface;
-				pacman.surface = prevSurface;
-				pacman.x = prevX;
-				pacman.y = prevY;
-			}
-			maze[3].Activate(pacman,curState);
-			break;
-		case SURFACE_E:
-			if(maze[4].ReturnElement(x,y) == 1){
-				//pacSurface = prevSurface;
-				pacman.surface = prevSurface;
-				pacman.x = prevX;
-				pacman.y = prevY;
-			}
-			break;
-		case SURFACE_B:
-			if(maze[5].ReturnElement(x,y) == 1){
-				//pacSurface = prevSurface;
-				pacman.surface = prevSurface;
-				pacman.x = prevX;
-				pacman.y = prevY;
-			}
-			break;
-	}
 	x = pacman.x;
 	y = pacman.y;
-
+	/* If there is a contradiction in the movement, restore and stop */
+	if(maze[pacman.surface].ReturnElement(x,y) == MAZE_WALL){
+		pacman.surface = prevSurface;
+		pacman.x = prevX;
+		pacman.y = prevY;
+		x = pacman.x;
+		y = pacman.y;
+	}
+	
 	/* Update the pacman state in the surface maze */
-	switch(NumToSurface(pacman.surface)){
-		case SURFACE_T:
-			maze[0].Activate(pacman,curState);
-			if(maze[0].EatPerl(x,y)){perls++;}
-			if(maze[0].EatCherry(x,y)){cherries++;}
-			if(maze[0].EatPowerPell(x,y)){
-				pacman.powerState = true;
-			}
-			break;
-		case SURFACE_N:
-			maze[1].Activate(pacman,curState);
-			if(maze[1].EatPerl(x,y)){perls++;};
-			if(maze[1].EatCherry(x,y)){cherries++;};
-			if(maze[1].EatPowerPell(x,y)){
-				pacman.powerState = true;
-			}
-			break;
-		case SURFACE_W:
-			maze[2].Activate(pacman,curState);
-			if(maze[2].EatPerl(x,y)){perls++;};
-			if(maze[2].EatCherry(x,y)){cherries++;};
-			if(maze[2].EatPowerPell(x,y)){
-				pacman.powerState = true;
-			}
-			break;
-		case SURFACE_S:
-			maze[3].Activate(pacman,curState);
-			if(maze[3].EatPerl(x,y)){perls++;};
-			if(maze[3].EatCherry(x,y)){cherries++;};
-			if(maze[3].EatPowerPell(x,y)){
-				pacman.powerState = true;
-			}
-			break;
-		case SURFACE_E:
-			maze[4].Activate(pacman,curState);
-			if(maze[4].EatPerl(x,y)){perls++;};
-			if(maze[4].EatCherry(x,y)){cherries++;};
-			if(maze[4].EatPowerPell(x,y)){
-				pacman.powerState = true;
-			}
-			break;
-		case SURFACE_B:
-			maze[5].Activate(pacman,curState);
-			if(maze[5].EatPerl(x,y)){perls++;};
-			if(maze[5].EatCherry(x,y)){cherries++;};
-			if(maze[5].EatPowerPell(x,y)){
-				pacman.powerState = true;
-			}
-			break;
+	surface = pacman.surface;
+	maze[surface].Activate(pacman, curState);
+	if(maze[surface].EatPell(x,y)){pells++;}
+	if(maze[surface].EatCherry(x,y)){cherries++;}
+	if(maze[surface].EatSuperPell(x,y)){
+		pacman.powerState = true;
 	}
 }
 #endif

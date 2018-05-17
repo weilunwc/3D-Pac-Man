@@ -140,7 +140,7 @@ int main(void){
 	Rule rule;
 	Score score;
 	PauseMenu pauseMenu;
-	bool plot3d = true, visualize = true;
+	bool plot3d = false, visualize = true;
 	Play play(visualize, plot3d);
 	
 	FsOpenWindow(0,100,1600,600,1);
