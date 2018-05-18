@@ -24,7 +24,7 @@
 using namespace std;
 
 /* Global variables shared by the whole program */
-extern int blockSize_2D;
+extern int blockSize2D;
 extern const int blockNumber;  // the size of the surface array
 extern double myPi;
 extern const int ghostNumber;
@@ -81,6 +81,22 @@ enum
 	MAZE_SUPERPELL
 };
 
+/* Collision Type */
+enum
+{
+	COLL_NONE,
+	COLL_EATPAC,
+	COLL_EATGHOST
+};
+
+/* Eat type */
+enum
+{
+	EAT_NONE,
+	EAT_PELL,
+	EAT_CHERRY,
+	EAT_SUPERPELL
+};
 
 /* the pacman x,y coordinates*/
 typedef struct CoordStruct{
@@ -88,6 +104,14 @@ typedef struct CoordStruct{
 	int y;
 }Coord;
 
+/* the rgb information */
+typedef struct ColorStruct{
+	int r;
+	int g;
+	int b;
+}Color;
+
+/* Agent info (ghost, pacman) */
 typedef struct AgentStruct{
 	int x;
 	int y;
@@ -97,44 +121,28 @@ typedef struct AgentStruct{
 	bool powerState;
 }Agent;
 
-
-/* the rgb information */
-typedef struct ColorStruct{
-	int r;
-	int g;
-	int b;
-}Color;
-
-
 /* A maze on a single surface, uses an array to representeach block */
 class Maze{
 protected:
 	int **maze;
-	int pacState; // 0 not in this surface, 1 not clear box, 2 clear box
-	Coord pacman;
-	Coord cherry;
-	vector<bool> ghostState;
 	Coord origin; // the (0,0) point on the global coordinates
 	Color baseColor; // R,G,B
 
 public:
 	Maze();
 	~Maze();
-	void SetMaze(int,int,int); // set the maze array
+	void SetMaze(int x, int y , int input); // set the maze array
 	void SetCherry();
 	void SetSuperPells();
-	void SetOrientation(char); // set the maze's relative position to other surfaces
+	void SetOrientation(int surface); // set the maze's relative position to other surfaces
 	void Draw();
-	void DrawGhost(int x, int y);
-	void DrawPacman(int, int);
+	void DrawGhost(int ghostX, int ghostY);
+	void DrawPacman(int pacX, int pacY);
 	void Print();
 	bool EatPell(int,int);
 	bool EatCherry(int,int);
 	bool EatSuperPell(int,int);
-	void Activate(Agent, int);// changes pacman coordinates and state
-	void Deactivate(); // turns down the pacman drawing
-	const int ReturnElement(int,int)const; // return the element of a coordinate
-	int ReturnPells();
+	const int ReturnElement(int x, int y) const; // return the element of a coordinate
 };
 
 Maze::Maze(){
@@ -142,14 +150,11 @@ Maze::Maze(){
 	for(int i = 0;i < blockNumber;i++){
 		maze[i] = new int [blockNumber];
 	}
-	pacState = 0;
 	for(int i = 0;i < blockNumber;i++){
 		for(int j = 0;j < blockNumber;j++){
 			maze[i][j] = 1;
 		}
 	}
-	cherry.x = 0;
-	cherry.y = 0;
 }
 
 Maze::~Maze(){
@@ -165,8 +170,6 @@ void Maze::SetCherry(){
 		x = rand()%blockNumber;
 		y = rand()%blockNumber;
 	}
-	cherry.x = x;
-	cherry.y = y;
 	maze[x][y] = MAZE_CHERRY;
 }
 
@@ -207,75 +210,62 @@ bool Maze::EatSuperPell(int i,int j){
 	return false;
 }
 
-
-int Maze::ReturnPells(){
-	int pells = 0;
-	for(int i = 0;i < blockNumber;i++){
-		for(int j = 0;j < blockNumber;j++){
-			if(maze[i][j] == -1){
-				pells++;
-			}
-		}
-	}
-	return pells;
-}
-
 /* Build the maze */
-void Maze::SetMaze(int i,int j,int input){
-	if(input == 0) maze[i][j] = MAZE_PELL;
-	else maze[i][j] = MAZE_WALL;
+void Maze::SetMaze(int x,int y,int input){
+	if(input == 0) maze[x][y] = MAZE_PELL;
+	else maze[x][y] = MAZE_WALL;
 }
 
-void Maze::SetOrientation(char orient){
-	switch(orient){
+void Maze::SetOrientation(int surface){
+	switch(surface){
 		case SURFACE_T:
 			baseColor.r = 200;
 			baseColor.g = 0;
 			baseColor.b = 0;
-			origin.x = 2*blockNumber*blockSize_2D;
+			origin.x = 2 * blockNumber * blockSize2D;
 			origin.y = 0;
 			break;
 		case SURFACE_B:
 			baseColor.r = 0;
 			baseColor.g = 200;
 			baseColor.b = 0;
-			origin.x = 2*blockNumber*blockSize_2D;
-			origin.y = 2*blockNumber*blockSize_2D;
+			origin.x = 2 * blockNumber * blockSize2D;
+			origin.y = 2 * blockNumber * blockSize2D;
 			break;
 		case SURFACE_N:
 			baseColor.r = 0;
 			baseColor.g = 0;
 			baseColor.b = 200;
 			origin.x = 0;
-			origin.y = blockNumber*blockSize_2D;
+			origin.y = blockNumber * blockSize2D;
 			break;
 		case SURFACE_W:
 			baseColor.r = 200;
 			baseColor.g = 0;
 			baseColor.b = 200;
-			origin.x = blockNumber*blockSize_2D;
-			origin.y = blockNumber*blockSize_2D;
+			origin.x = blockNumber * blockSize2D;
+			origin.y = blockNumber * blockSize2D;
 			break;
 		case SURFACE_S:
 			baseColor.r = 200;
 			baseColor.g = 200;
 			baseColor.b = 0;
-			origin.x = 2*blockNumber*blockSize_2D;
-			origin.y = blockNumber*blockSize_2D;
+			origin.x = 2 * blockNumber * blockSize2D;
+			origin.y = blockNumber * blockSize2D;
 			break;
 		case SURFACE_E:
 			baseColor.r = 0;
 			baseColor.g = 200;
 			baseColor.b = 200;
-			origin.x = 3*blockNumber*blockSize_2D;
-			origin.y = blockNumber*blockSize_2D;
+			origin.x = 3 * blockNumber * blockSize2D;
+			origin.y = blockNumber * blockSize2D;
 			break;
 
 	}
 }
 
-const int Maze::ReturnElement(int i,int j)const{
-	return maze[i][j];
+const int Maze::ReturnElement(int x,int y) const{
+	return maze[x][y];
 }
 
 /* Print the maze components */
@@ -289,31 +279,22 @@ void Maze::Print(){
 	printf("\n");
 }
 
-void Maze::Activate(Agent cur,int state){
-	pacman.x = cur.x;
-	pacman.y = cur.y;
-	pacState = state;
-}
-
-void Maze::Deactivate(){
-	pacState = 0;
-}
-void Maze::DrawGhost(int x, int y){
+void Maze::DrawGhost(int ghostX, int ghostY){
 	glColor3ub(0,0,0);
 	glBegin(GL_QUADS);
-	x *= blockSize_2D;
-	y *= blockSize_2D;
-	glVertex2i(origin.x + x            ,origin.y + y            );
-	glVertex2i(origin.x + x + blockSize_2D,origin.y + y            );
-	glVertex2i(origin.x + x + blockSize_2D,origin.y + y + blockSize_2D);
-	glVertex2i(origin.x + x            ,origin.y + y + blockSize_2D);
+	ghostX *= blockSize2D;
+	ghostY *= blockSize2D;
+	glVertex2i(origin.x + ghostX            ,origin.y + ghostY            );
+	glVertex2i(origin.x + ghostX + blockSize2D,origin.y + ghostY            );
+	glVertex2i(origin.x + ghostX + blockSize2D,origin.y + ghostY + blockSize2D);
+	glVertex2i(origin.x + ghostX            ,origin.y + ghostY + blockSize2D);
 	glEnd();
 }
 
-void Maze::DrawPacman(int pac_x, int pac_y){
-	double x = (double)(origin.x + blockSize_2D*pac_x + blockSize_2D/2);
-	double y = (double)(origin.y + blockSize_2D*pac_y + blockSize_2D/2);
-	double r = blockSize_2D/2;
+void Maze::DrawPacman(int pacX, int pacY){
+	double x = (double)(origin.x + blockSize2D*pacX + blockSize2D/2);
+	double y = (double)(origin.y + blockSize2D*pacY + blockSize2D/2);
+	double r = blockSize2D/2;
 	glColor3ub(0,0,100);
 	glBegin(GL_POLYGON);
 	for(int i = 0;i < 64;i++){
@@ -328,64 +309,47 @@ void Maze::DrawPacman(int pac_x, int pac_y){
 void Maze::Draw(){
 	for(int i = 0;i < blockNumber;i++){
 		for(int j = 0;j < blockNumber;j++){
-			int x = blockSize_2D*i;
-			int y = blockSize_2D*j;
+			int x = blockSize2D * i;
+			int y = blockSize2D * j;
 			
-			/* Draw background */
+			/* Draw a color block */
 			if(maze[i][j] == MAZE_WALL){
-				glColor3ub(baseColor.r,baseColor.g,baseColor.b);
+				glColor3ub(baseColor.r, baseColor.g, baseColor.b);
 			}
 			else{
+				/* White color for path */
 				glColor3ub(255,255,255);
 			}
 			glBegin(GL_QUADS);
-			glVertex2i(origin.x + x            ,origin.y + y            );
-			glVertex2i(origin.x + x + blockSize_2D,origin.y + y            );
-			glVertex2i(origin.x + x + blockSize_2D,origin.y + y + blockSize_2D);
-			glVertex2i(origin.x + x            ,origin.y + y + blockSize_2D);
+			glVertex2i(origin.x + x               , origin.y + y               );
+			glVertex2i(origin.x + x + blockSize2D, origin.y + y               );
+			glVertex2i(origin.x + x + blockSize2D, origin.y + y + blockSize2D);
+			glVertex2i(origin.x + x               , origin.y + y + blockSize2D);
 			glEnd();
+			
+			/* Draw maze elements */
+			if(maze[i][j] != MAZE_EMPTY){
+				switch(maze[i][j]){
+					case MAZE_PELL:
+						glColor3ub(100,100,0);
+						break;
+					case MAZE_CHERRY:
+						glColor3ub(200,0,0);
+						break;
+					case MAZE_SUPERPELL:
+						glColor3ub(0,0,200);
+						break;
+				}
+				
+				double centerX = origin.x + x + blockSize2D/2;
+				double centerY = origin.y + y + blockSize2D/2;
+				double r = blockSize2D/2.0 - 1.0;
 
-			if(maze[i][j] == MAZE_PELL){
-				// draw the pells
-				double centerx = origin.x + x + blockSize_2D/2;
-				double centery = origin.y + y + blockSize_2D/2;
-				double r = blockSize_2D/2.0 - 1.0;
-				glColor3ub(100,100,0);
 				glBegin(GL_POLYGON);
 				for(int k = 0;k < 64;k++){
 					double angle = (double)k*myPi/32.0;
-					double cx = centerx + r*cos(angle);
-					double cy = centery + r*sin(angle);
-					glVertex2d(cx,cy);
-				}
-				glEnd();
-			}
-			if(maze[i][j] == MAZE_CHERRY){
-				// draw the cherry
-				double centerx = origin.x + x + blockSize_2D/2;
-				double centery = origin.y + y + blockSize_2D/2;
-				double r = blockSize_2D/2.0 - 1.0;
-				glColor3ub(200,0,0);
-				glBegin(GL_POLYGON);
-				for(int k = 0;k < 64;k++){
-					double angle = (double)k*myPi/32.0;
-					double cx = centerx + r*cos(angle);
-					double cy = centery + r*sin(angle);
-					glVertex2d(cx,cy);
-				}
-				glEnd();
-			}
-			if(maze[i][j] == MAZE_SUPERPELL){
-				// draw the super pells
-				double centerx = origin.x + x + blockSize_2D/2;
-				double centery = origin.y + y + blockSize_2D/2;
-				double r = blockSize_2D/2.0 - 1.0;
-				glColor3ub(0,0,200);
-				glBegin(GL_POLYGON);
-				for(int k = 0;k < 64;k++){
-					double angle = (double)k*myPi/32.0;
-					double cx = centerx + r*cos(angle);
-					double cy = centery + r*sin(angle);
+					double cx = centerX + r*cos(angle);
+					double cy = centerY + r*sin(angle);
 					glVertex2d(cx,cy);
 				}
 				glEnd();
@@ -398,15 +362,15 @@ void Maze::Draw(){
 	glColor3ub(1,1,1);
 	glBegin(GL_LINES);
 	glVertex2i(origin.x,origin.y);
-	glVertex2i(origin.x + blockNumber*blockSize_2D,origin.y);
+	glVertex2i(origin.x + blockNumber*blockSize2D,origin.y);
 
-	glVertex2i(origin.x + blockNumber*blockSize_2D,origin.y);
-	glVertex2i(origin.x + blockNumber*blockSize_2D,origin.y + blockNumber*blockSize_2D);
+	glVertex2i(origin.x + blockNumber*blockSize2D,origin.y);
+	glVertex2i(origin.x + blockNumber*blockSize2D,origin.y + blockNumber*blockSize2D);
 
-	glVertex2i(origin.x + blockNumber*blockSize_2D,origin.y + blockNumber*blockSize_2D);
-	glVertex2i(origin.x,origin.y + blockNumber*blockSize_2D);
+	glVertex2i(origin.x + blockNumber*blockSize2D,origin.y + blockNumber*blockSize2D);
+	glVertex2i(origin.x,origin.y + blockNumber*blockSize2D);
 
-	glVertex2i(origin.x,origin.y + blockNumber*blockSize_2D);
+	glVertex2i(origin.x,origin.y + blockNumber*blockSize2D);
 	glVertex2i(origin.x,origin.y);
 	glEnd();
 }
@@ -431,7 +395,7 @@ public:
 	FullMaze(){};
 	void Draw();
 	void Print();
-	void PacMove();
+	int PacMove();
 	void GhostMove(int);
 	void Restart();
 	void Restore();
@@ -439,17 +403,17 @@ public:
 	void ChangePacDirection(int);
 	void ChangeGhostDirection(int);
 	int ReturnGhostControl();
-	bool CollisionDetect();
+	int CollisionDetect();
 	void SetMaze();
 	void SetCherry();
 	void SetSuperPells();
 	const void ReturnMaze(int***) const;
 	void ReturnPacman(Agent &pacInfo);
 	void ReturnGhost(vector<Agent> &ghostInfo);
-	int ReturnPells();
 	void SwitchGhost();
 	void GhostChase(int ghostIndex);
 	void AgentMove(Agent &agent);
+
 };
 
 
@@ -472,7 +436,6 @@ void FullMaze::Restart(){
 	pacman.prevY = 12;
 	pacman.powerState = false;
 	pells = 0;
-	maze[SURFACE_S].Activate(pacman, curState);
 	ghostLives = ghostNumber;
 	ghost.resize(ghostLives);
 	int j = 0;
@@ -501,13 +464,6 @@ void FullMaze::Restart(){
 	}
 }
 
-int FullMaze::ReturnPells(){
-	int pells = 0;
-	for(int i = 0;i < 6;i++){
-		pells += maze[i].ReturnPells();
-	}
-	return pells;
-}
 
 /* Simple heuristic AI for automatic ghost chase */
 void FullMaze::GhostChase(int ghostIndex) {
@@ -561,9 +517,7 @@ void FullMaze::Restore(){
 	pacman.x = 8;
 	pacman.y = 12;
 	for(int i = 0;i < 6;i++){
-		maze[i].Deactivate();
 	}
-	maze[SURFACE_S].Activate(pacman,curState);
 	ghost.resize(ghostLives);
 	int j = 0;
 	int k = 0;
@@ -593,20 +547,25 @@ void FullMaze::Restore(){
 }
 
 /* Check if there is a collision between ghost and pacman */
-bool FullMaze::CollisionDetect(){
+int FullMaze::CollisionDetect(){
 	int n = ghost.size();
-	bool detect = false;
 	for(int i = 0;i < n;i++){
-		if(pacman.surface == ghost[i].surface && pacman.x == ghost[i].x && pacman.y == ghost[i].y){
+		/* Check collision */
+		bool collide = false;
+		if(pacman.surface == ghost[i].surface && pacman.x == ghost[i].x && pacman.y == ghost[i].y) 
+			collide = true;
+		else if(pacman.surface == ghost[i].surface && pacman.prevX == ghost[i].x && pacman.prevY == ghost[i].y
+					&& pacman.x == ghost[i].prevX && pacman.y == ghost[i].prevY) 
+			collide = true;
+		
+		if(collide == true){
 			if(pacman.powerState == false){
-				// eat pacman
+				/* Eat pacman */
 				Restore();
-				return true;
+				return COLL_EATPAC;
 			}
 			else{
-				// eat ghost 
-				detect = true;
-				// Eat the ghost
+				/* Eat ghost i */
 				if(n > 1){
 					ghost.erase(ghost.begin() + i);
 					ghostLives--;
@@ -621,38 +580,13 @@ bool FullMaze::CollisionDetect(){
 					ghost[i].y = 11;
 					ghost[i].prevX = 11;
 					ghost[i].prevY = 11;
-				}
-			}
 
-		}
-		else if(pacman.surface == ghost[i].surface && pacman.prevX == ghost[i].x && pacman.prevY == ghost[i].y
-				&& pacman.x == ghost[i].prevX && pacman.y == ghost[i].prevY){
-
-			if(pacman.powerState == false){
-				Restore();
-				return true;
-			}
-			else{
-				detect = true;
-				// Eat the ghost
-				if(n > 1){
-					ghost.erase(ghost.begin() + i);
-					ghostLives--;
-					ghostControl = rand()%ghostLives;
 				}
-				else{
-					int i = 0;
-					ghost[i].dir = DIR_STOP;
-					ghost[i].surface = 1+rand()%4;
-					ghost[i].x = 11;
-					ghost[i].y = 11;
-					ghost[i].prevX = 11;
-					ghost[i].prevY = 11;
-				}
+				return COLL_EATGHOST;
 			}
 		}
 	}
-	return false;
+	return COLL_NONE;
 }
 
 void FullMaze::Draw(){
@@ -691,9 +625,6 @@ void FullMaze::ReturnPacman(Agent &pacInfo){
 	pacInfo.surface = pacman.surface;
 	pacInfo.powerState = pacman.powerState;
 }
-
-
-
 
 /* Load from text and build maze */
 void FullMaze::SetMaze(){
@@ -843,37 +774,31 @@ void FullMaze::AgentMove(Agent &agent){
 			if(agent.x < 0){
 				switch(surface){
 					case SURFACE_T:
-						maze[surface].Deactivate();
 						agent.surface = SURFACE_W;
 						agent.x = agent.y;
 						agent.y = 0;
 						agent.dir = DIR_DOWN;
 						break;
 					case SURFACE_N:
-						maze[surface].Deactivate();
 						agent.surface = SURFACE_E;
 						agent.x = blockNumber-1;
 						break;
 					case SURFACE_W:
-						maze[surface].Deactivate();
 						agent.surface = SURFACE_N;
 						//agent.surface = SURFACE_N;
 						agent.x = blockNumber-1;
 						break;
 					case SURFACE_S:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_W;
 						agent.surface = SURFACE_W;
 						agent.x = blockNumber-1;
 						break;
 					case SURFACE_E:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_S;
 						agent.surface = SURFACE_S;
 						agent.x = blockNumber-1;
 						break;
 					case SURFACE_B:
-						maze[surface].Deactivate();
 						agent.surface = SURFACE_W;
 						//pacSurface = SURFACE_W;
 						agent.x = blockNumber-1 - agent.y;
@@ -888,7 +813,6 @@ void FullMaze::AgentMove(Agent &agent){
 			if(agent.y < 0){
 				switch(agent.surface){
 					case SURFACE_T:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_N;
 						agent.surface = SURFACE_N;
 						agent.x = blockNumber-1 - agent.x;
@@ -896,7 +820,6 @@ void FullMaze::AgentMove(Agent &agent){
 						agent.dir = DIR_DOWN;
 						break;
 					case SURFACE_N:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_T;
 						agent.surface = SURFACE_T;
 						agent.x = blockNumber-1 - agent.x;
@@ -904,7 +827,6 @@ void FullMaze::AgentMove(Agent &agent){
 						agent.dir = DIR_DOWN;
 						break;
 					case SURFACE_W:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_T;
 						agent.surface = SURFACE_T;
 						agent.y = agent.x;
@@ -912,13 +834,11 @@ void FullMaze::AgentMove(Agent &agent){
 						agent.dir = DIR_RIGHT;
 						break;
 					case SURFACE_S:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_T;
 						agent.surface = SURFACE_T;
 						agent.y = blockNumber-1;
 						break;
 					case SURFACE_E:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_T;
 						agent.surface = SURFACE_T;
 						agent.y= blockNumber-1 - agent.x;
@@ -926,7 +846,6 @@ void FullMaze::AgentMove(Agent &agent){
 						agent.dir = DIR_LEFT;
 						break;
 					case SURFACE_B:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_S;
 						agent.surface = SURFACE_S;
 						agent.y = blockNumber-1;
@@ -939,7 +858,6 @@ void FullMaze::AgentMove(Agent &agent){
 			if(agent.x >= blockNumber){
 				switch(agent.surface){
 					case SURFACE_T:
-						maze[surface].Deactivate();
 						agent.surface = SURFACE_E;
 						//pacSurface = SURFACE_E;
 						agent.x = blockNumber - 1 - agent.y;
@@ -947,31 +865,26 @@ void FullMaze::AgentMove(Agent &agent){
 						agent.dir = DIR_DOWN;
 						break;
 					case SURFACE_N:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_W;
 						agent.surface = SURFACE_W;
 						agent.x = 0;
 						break;
 					case SURFACE_W:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_S;
 						agent.surface = SURFACE_S;
 						agent.x = 0;
 						break;
 					case SURFACE_S:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_E;
 						agent.surface = SURFACE_E;
 						agent.x = 0;
 						break;
 					case SURFACE_E:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_N;
 						agent.surface = SURFACE_N;
 						agent.x = 0;
 						break;
 					case SURFACE_B:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_E;
 						agent.surface = SURFACE_E;
 						agent.x = agent.y;
@@ -986,13 +899,11 @@ void FullMaze::AgentMove(Agent &agent){
 			if(agent.y >= blockNumber){
 				switch(agent.surface){
 					case SURFACE_T:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_S;
 						agent.surface = SURFACE_S;
 						agent.y = 0;
 						break;
 					case SURFACE_N:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_B;
 						agent.surface = SURFACE_B;
 						agent.x = blockNumber-1-agent.x;
@@ -1000,7 +911,6 @@ void FullMaze::AgentMove(Agent &agent){
 						agent.dir = DIR_UP;
 						break;
 					case SURFACE_W:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_B;
 						agent.surface = SURFACE_B;
 						agent.y = blockNumber-1-agent.x;
@@ -1008,13 +918,11 @@ void FullMaze::AgentMove(Agent &agent){
 						agent.dir = DIR_RIGHT;
 						break;
 					case SURFACE_S:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_B;
 						agent.surface = SURFACE_B;
 						agent.y = 0;
 						break;
 					case SURFACE_E:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_B;
 						agent.surface = SURFACE_B;
 						agent.y = agent.x;
@@ -1023,7 +931,6 @@ void FullMaze::AgentMove(Agent &agent){
 						//bool powerState;
 						break;
 					case SURFACE_B:
-						maze[surface].Deactivate();
 						//pacSurface = SURFACE_N;
 						agent.surface = SURFACE_N;
 						agent.x = blockNumber - 1 - agent.x;
@@ -1036,8 +943,8 @@ void FullMaze::AgentMove(Agent &agent){
 	}
 }
 
-/* Move pacman */
-void FullMaze::PacMove(){
+/* Move pacman and update map from eaten item, and return score */
+int FullMaze::PacMove(){
 	/* Store the current state to prevent bumping to walls */
 	int prevX, prevY, prevSurface;
 	int x, y, surface;
@@ -1062,13 +969,18 @@ void FullMaze::PacMove(){
 		y = pacman.y;
 	}
 	
-	/* Update the pacman state in the surface maze */
+	/* Update the pacman state in the surface maze and calculate reward */
 	surface = pacman.surface;
-	maze[surface].Activate(pacman, curState);
-	if(maze[surface].EatPell(x,y)){pells++;}
-	if(maze[surface].EatCherry(x,y)){cherries++;}
+	int eat = EAT_NONE;
+	if(maze[surface].EatPell(x,y)) eat = EAT_PELL;
+	if(maze[surface].EatCherry(x,y)) eat = EAT_CHERRY;
 	if(maze[surface].EatSuperPell(x,y)){
 		pacman.powerState = true;
+		eat = EAT_SUPERPELL;
 	}
+	return eat;
 }
 #endif
+
+
+

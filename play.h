@@ -33,7 +33,7 @@ protected:
 	Agent pacInfo;
 	vector<Agent> ghostInfo;
 	time_t t0, dt, timeMax, timeLeft;
-	int lives, countDown, loopCount, totalPells;
+	int lives, countDown, loopCount;
    	bool setCherry, setPower; 
 	/* Drawing functions */
 	void DrawBackground();
@@ -103,8 +103,7 @@ void Play::Setup(){
 	maze.SetMaze(); // load map
 	
 	/* Game parameters */
-	timeMax = 60;
-	totalPells = 1883;	
+	timeMax = 10;
 
 	/* Set up music */
 	musicPlayer.MakeCurrent();
@@ -150,9 +149,8 @@ bool Play::CheckEndCondition(){
 	 * Game ends one condition is satisfied 
 	 * 1. times up 
 	 * 2. pacman out of lives
-	 * 3. eaten all the pells 
 	 */
-	if(dt >= timeMax || lives <= 0 || maze.pells == totalPells){
+	if(dt >= timeMax || lives <= 0){
 		return true;
 	}
 	return false;	
@@ -178,23 +176,45 @@ void Play::Step(int pacCmd, int ghostCmd, int &pacReward, int &ghostReward){
 	maze.ChangeGhostDirection(ghostCmd);
 	
 	/* Update maze */
-	maze.PacMove();
+	int pacEat = maze.PacMove();
+	switch(pacEat){
+		case EAT_PELL:
+			pacReward = 1;
+			break;
+		case EAT_CHERRY:
+			pacReward = 20;
+			break;
+		case EAT_SUPERPELL:
+			pacReward = 20;
+			break;
+		default:
+			pacReward = 0;
+	}
 	maze.GhostMove(loopCount);
-	if(maze.CollisionDetect()){
-		musicPlayer.Stop(pacman_death);
-		musicPlayer.PlayOneShot(pacman_death);
-		lives--;
-		maze.SwitchGhost();
+	
+	int collision = maze.CollisionDetect();
+	if(collision != COLL_NONE){
+		if(collision == COLL_EATPAC){
+			musicPlayer.Stop(pacman_death);
+			musicPlayer.PlayOneShot(pacman_death);
+			lives--;
+			maze.SwitchGhost();
+			ghostReward += 500;
+			pacReward -= 500;
+
+			/* Restore game to initial position */
+			maze.Restore();
+		}
+		else{
+			pacReward += 200;
+			ghostReward -= 200;
+		}
 	}
 	
 	UpdateTime();
 	UpdateGame();
 	loopCount++;
 	
-	/* Update score */
-	pacReward = 0;
-	ghostReward = 0;
-
 }
 
 /* Sends commands for pacman player only and updates game and score */
@@ -203,7 +223,7 @@ void Play::PacStep(int cmd, int &reward){
 	maze.ChangePacDirection(cmd);
 	
 	/* Update maze */
-	maze.PacMove();
+	reward += maze.PacMove();
 	if(maze.CollisionDetect()){
 		musicPlayer.Stop(pacman_death);
 		musicPlayer.PlayOneShot(pacman_death);
@@ -214,8 +234,6 @@ void Play::PacStep(int cmd, int &reward){
 	UpdateGame();
 	loopCount++;
 	
-	/* Update score */
-	reward = 0;
 }
 
 /* Sends commands for ghost player only and updates game and score */
@@ -369,6 +387,7 @@ void Play::Draw3DMaze(){
 	/* Plot the ghost camera view */
 	ghostView.CameraFollow(ghostInfo[ghostNow].surface, ghostInfo[ghostNow].x, 
 								ghostInfo[ghostNow].y);
+	/* Plot on two sides */
 	if(exchangePlayers == false){
 		glViewport(-wid/4,0,wid,hei);
 	}

@@ -24,13 +24,12 @@
 using namespace std;
 
 const int blockNumber = 25;
-int blockSize_2D = 6;
-int blockSize_3D = 7;
+int blockSize2D = 6;
+int blockSize3D = 7;
 const string nullString = "\0";
 
 double myPi = 3.1415926;
 const int ghostNumber = 10;
-const int totalPells = 1883;
 
 /* Changes the keyboard commands to pacman control commnads */
 int Key2PacCmd(int key, bool exchangePlayers){
@@ -140,7 +139,7 @@ int main(void){
 	Rule rule;
 	Score score;
 	PauseMenu pauseMenu;
-	bool plot3d = false, visualize = true;
+	bool plot3d = true, visualize = true;
 	Play play(visualize, plot3d);
 	
 	FsOpenWindow(0,100,1600,600,1);
@@ -206,16 +205,18 @@ int main(void){
 							/* Send keyboard signals through env API */
 							int pacCmd = Key2PacCmd(key, exchangePlayers);
 							int ghostCmd = Key2GhostCmd(key, exchangePlayers);
-							int pacScore, ghostScore;
-							play.Step(pacCmd, ghostCmd, pacScore, ghostScore);
+							int pacReward, ghostReward;
+							pacReward = 0;
+							ghostReward = 0;
+							play.Step(pacCmd, ghostCmd, pacReward, ghostReward);
 							
 							if(exchangePlayers == false){
-								score1 += pacScore;
-								score2 += ghostScore;
+								score1 += pacReward;
+								score2 += ghostReward;
 							}
 							else{
-								score1 += ghostScore;
-								score2 += pacScore;
+								score1 += ghostReward;
+								score2 += pacReward;
 							}
 						}
 					}

@@ -4,7 +4,7 @@
 #include "maze.h"
 using namespace std;
 
-extern int blockSize_3D; // Giada's Modification
+extern int blockSize3D; // Giada's Modification
 extern const int blockNumber;
 extern double myPi;
 
@@ -22,13 +22,6 @@ typedef struct CursorStruct_3D{
   int ydir;
   bool powerState = false;
 }Coord_3D;
-/*
-typedef struct ColorStruct{
-  int r;
-  int g;
-  int b;
-}Color;
-*/
 
 class Maze_3D{
   protected:
@@ -267,13 +260,13 @@ void Maze_3D::SetOrientation(char orient){
       baseColor.r = 0;
       baseColor.g = 0;
       baseColor.b = 175;
-      origin.x = 2*blockNumber*blockSize_3D;
+      origin.x = 2*blockNumber*blockSize3D;
       origin.y = 0;
 
       // Giada's Edition
-      origin3.x = -blockNumber*blockSize_3D*0.5;
-      origin3.y =  blockNumber*blockSize_3D*0.5;
-      origin3.z = -blockNumber*blockSize_3D*0.5;
+      origin3.x = -blockNumber*blockSize3D*0.5;
+      origin3.y =  blockNumber*blockSize3D*0.5;
+      origin3.z = -blockNumber*blockSize3D*0.5;
       nextX.x   = 1;
       nextX.y   = 0;
       nextX.z   = 0;
@@ -286,13 +279,13 @@ void Maze_3D::SetOrientation(char orient){
       baseColor.r = 0;
       baseColor.g = 0;
       baseColor.b = 175;
-      origin.x = 2*blockNumber*blockSize_3D;
-      origin.y = 2*blockNumber*blockSize_3D;
+      origin.x = 2*blockNumber*blockSize3D;
+      origin.y = 2*blockNumber*blockSize3D;
 
       // Giada's Edition
-      origin3.x = -blockNumber*blockSize_3D*0.5;
-      origin3.y = -blockNumber*blockSize_3D*0.5;
-      origin3.z =  blockNumber*blockSize_3D*0.5;
+      origin3.x = -blockNumber*blockSize3D*0.5;
+      origin3.y = -blockNumber*blockSize3D*0.5;
+      origin3.z =  blockNumber*blockSize3D*0.5;
       nextX.x   = 1;
       nextX.y   = 0;
       nextX.z   = 0;
@@ -306,12 +299,12 @@ void Maze_3D::SetOrientation(char orient){
       baseColor.g = 0;
       baseColor.b = 175;
       origin.x = 0;
-      origin.y = blockNumber*blockSize_3D;
+      origin.y = blockNumber*blockSize3D;
 
       // Giada's Edition
-      origin3.x =  (blockNumber  )*blockSize_3D*0.5;
-      origin3.y =  (blockNumber  )*blockSize_3D*0.5;
-      origin3.z = -(blockNumber)*blockSize_3D*0.5;
+      origin3.x =  (blockNumber  )*blockSize3D*0.5;
+      origin3.y =  (blockNumber  )*blockSize3D*0.5;
+      origin3.z = -(blockNumber)*blockSize3D*0.5;
       nextX.x   = -1;
       nextX.y   = 0;
       nextX.z   = 0;
@@ -324,13 +317,13 @@ void Maze_3D::SetOrientation(char orient){
       baseColor.r = 0;
       baseColor.g = 0;
       baseColor.b = 175;
-      origin.x = blockNumber*blockSize_3D;
-      origin.y = blockNumber*blockSize_3D;
+      origin.x = blockNumber*blockSize3D;
+      origin.y = blockNumber*blockSize3D;
 
       // Giada's Edition
-      origin3.x = -blockNumber*blockSize_3D*0.5;
-      origin3.y =  blockNumber*blockSize_3D*0.5;
-      origin3.z = -blockNumber*blockSize_3D*0.5;
+      origin3.x = -blockNumber*blockSize3D*0.5;
+      origin3.y =  blockNumber*blockSize3D*0.5;
+      origin3.z = -blockNumber*blockSize3D*0.5;
       nextX.x   = 0;
       nextX.y   = 0;
       nextX.z   = 1;
@@ -343,13 +336,13 @@ void Maze_3D::SetOrientation(char orient){
       baseColor.r = 0;
       baseColor.g = 0;
       baseColor.b = 175;
-      origin.x = 2*blockNumber*blockSize_3D;
-      origin.y = blockNumber*blockSize_3D;
+      origin.x = 2*blockNumber*blockSize3D;
+      origin.y = blockNumber*blockSize3D;
 
       // Giada's Edition
-      origin3.x = -(blockNumber)*blockSize_3D*0.5;
-      origin3.y =  (blockNumber)*blockSize_3D*0.5;
-      origin3.z =  (blockNumber)*blockSize_3D*0.5;
+      origin3.x = -(blockNumber)*blockSize3D*0.5;
+      origin3.y =  (blockNumber)*blockSize3D*0.5;
+      origin3.z =  (blockNumber)*blockSize3D*0.5;
       nextX.x   = 1;
       nextX.y   = 0;
       nextX.z   = 0;
@@ -362,13 +355,13 @@ void Maze_3D::SetOrientation(char orient){
       baseColor.r = 0;
       baseColor.g = 0;
       baseColor.b = 175;
-      origin.x = 3*blockNumber*blockSize_3D;
-      origin.y = blockNumber*blockSize_3D;
+      origin.x = 3*blockNumber*blockSize3D;
+      origin.y = blockNumber*blockSize3D;
 
       // Giada's Edition
-      origin3.x = (blockNumber)*blockSize_3D*0.5;
-      origin3.y = (blockNumber)*blockSize_3D*0.5;
-      origin3.z = (blockNumber)*blockSize_3D*0.5;
+      origin3.x = (blockNumber)*blockSize3D*0.5;
+      origin3.y = (blockNumber)*blockSize3D*0.5;
+      origin3.z = (blockNumber)*blockSize3D*0.5;
       nextX.x   = 0;
       nextX.y   = 0;
       nextX.z   = -1;
@@ -421,9 +414,9 @@ void Maze_3D::Draw3D()
     for(int i = 0;i < blockNumber;i++){
       for(int j = 0;j < blockNumber;j++){
 
-        x = (double)(origin3.x + nextX.x*blockSize_3D*i + nextY.x*blockSize_3D*j);
-        y = (double)(origin3.y + nextX.y*blockSize_3D*i + nextY.y*blockSize_3D*j);
-        z = (double)(origin3.z + nextX.z*blockSize_3D*i + nextY.z*blockSize_3D*j);
+        x = (double)(origin3.x + nextX.x*blockSize3D*i + nextY.x*blockSize3D*j);
+        y = (double)(origin3.y + nextX.y*blockSize3D*i + nextY.y*blockSize3D*j);
+        z = (double)(origin3.z + nextX.z*blockSize3D*i + nextY.z*blockSize3D*j);
 
         if (curState > 0 && cursor.x == i && cursor.y == j) DrawPacMan(x,y,z);
 
@@ -431,18 +424,18 @@ void Maze_3D::Draw3D()
           if (maze[i][j] == 1) {
             glColor3ub(baseColor.r,baseColor.g,baseColor.b);
             glBegin(GL_QUADS);
-            glVertex3d(origin3.x + nextX.x*blockSize_3D*i     + nextY.x*blockSize_3D*j,
-                       origin3.y + nextX.y*blockSize_3D*i     + nextY.y*blockSize_3D*j,
-                       origin3.z + nextX.z*blockSize_3D*i     + nextY.z*blockSize_3D*j    );
-            glVertex3d(origin3.x + nextX.x*blockSize_3D*(i+1) + nextY.x*blockSize_3D*j,
-                       origin3.y + nextX.y*blockSize_3D*(i+1) + nextY.y*blockSize_3D*j,
-                       origin3.z + nextX.z*blockSize_3D*(i+1) + nextY.z*blockSize_3D*j    );
-            glVertex3d(origin3.x + nextX.x*blockSize_3D*(i+1) + nextY.x*blockSize_3D*(j+1),
-                       origin3.y + nextX.y*blockSize_3D*(i+1) + nextY.y*blockSize_3D*(j+1),
-                       origin3.z + nextX.z*blockSize_3D*(i+1) + nextY.z*blockSize_3D*(j+1));
-            glVertex3d(origin3.x + nextX.x*blockSize_3D*i     + nextY.x*blockSize_3D*(j+1),
-                       origin3.y + nextX.y*blockSize_3D*i     + nextY.y*blockSize_3D*(j+1),
-                       origin3.z + nextX.z*blockSize_3D*i     + nextY.z*blockSize_3D*(j+1));
+            glVertex3d(origin3.x + nextX.x*blockSize3D*i     + nextY.x*blockSize3D*j,
+                       origin3.y + nextX.y*blockSize3D*i     + nextY.y*blockSize3D*j,
+                       origin3.z + nextX.z*blockSize3D*i     + nextY.z*blockSize3D*j    );
+            glVertex3d(origin3.x + nextX.x*blockSize3D*(i+1) + nextY.x*blockSize3D*j,
+                       origin3.y + nextX.y*blockSize3D*(i+1) + nextY.y*blockSize3D*j,
+                       origin3.z + nextX.z*blockSize3D*(i+1) + nextY.z*blockSize3D*j    );
+            glVertex3d(origin3.x + nextX.x*blockSize3D*(i+1) + nextY.x*blockSize3D*(j+1),
+                       origin3.y + nextX.y*blockSize3D*(i+1) + nextY.y*blockSize3D*(j+1),
+                       origin3.z + nextX.z*blockSize3D*(i+1) + nextY.z*blockSize3D*(j+1));
+            glVertex3d(origin3.x + nextX.x*blockSize3D*i     + nextY.x*blockSize3D*(j+1),
+                       origin3.y + nextX.y*blockSize3D*i     + nextY.y*blockSize3D*(j+1),
+                       origin3.z + nextX.z*blockSize3D*i     + nextY.z*blockSize3D*(j+1));
             glEnd();
           }
           else if (maze[i][j] == MAZE_PELL) DrawPell(x,y,z);
@@ -451,18 +444,18 @@ void Maze_3D::Draw3D()
           else if (maze[i][j] == MAZE_WALL) {
             glColor3ub(0,0,0);
             glBegin(GL_QUADS);
-            glVertex3d(origin3.x + nextX.x*blockSize_3D*i     + nextY.x*blockSize_3D*j,
-                       origin3.y + nextX.y*blockSize_3D*i     + nextY.y*blockSize_3D*j,
-                       origin3.z + nextX.z*blockSize_3D*i     + nextY.z*blockSize_3D*j    );
-            glVertex3d(origin3.x + nextX.x*blockSize_3D*(i+1) + nextY.x*blockSize_3D*j,
-                       origin3.y + nextX.y*blockSize_3D*(i+1) + nextY.y*blockSize_3D*j,
-                       origin3.z + nextX.z*blockSize_3D*(i+1) + nextY.z*blockSize_3D*j    );
-            glVertex3d(origin3.x + nextX.x*blockSize_3D*(i+1) + nextY.x*blockSize_3D*(j+1),
-                       origin3.y + nextX.y*blockSize_3D*(i+1) + nextY.y*blockSize_3D*(j+1),
-                       origin3.z + nextX.z*blockSize_3D*(i+1) + nextY.z*blockSize_3D*(j+1));
-            glVertex3d(origin3.x + nextX.x*blockSize_3D*i     + nextY.x*blockSize_3D*(j+1),
-                       origin3.y + nextX.y*blockSize_3D*i     + nextY.y*blockSize_3D*(j+1),
-                       origin3.z + nextX.z*blockSize_3D*i     + nextY.z*blockSize_3D*(j+1));
+            glVertex3d(origin3.x + nextX.x*blockSize3D*i     + nextY.x*blockSize3D*j,
+                       origin3.y + nextX.y*blockSize3D*i     + nextY.y*blockSize3D*j,
+                       origin3.z + nextX.z*blockSize3D*i     + nextY.z*blockSize3D*j    );
+            glVertex3d(origin3.x + nextX.x*blockSize3D*(i+1) + nextY.x*blockSize3D*j,
+                       origin3.y + nextX.y*blockSize3D*(i+1) + nextY.y*blockSize3D*j,
+                       origin3.z + nextX.z*blockSize3D*(i+1) + nextY.z*blockSize3D*j    );
+            glVertex3d(origin3.x + nextX.x*blockSize3D*(i+1) + nextY.x*blockSize3D*(j+1),
+                       origin3.y + nextX.y*blockSize3D*(i+1) + nextY.y*blockSize3D*(j+1),
+                       origin3.z + nextX.z*blockSize3D*(i+1) + nextY.z*blockSize3D*(j+1));
+            glVertex3d(origin3.x + nextX.x*blockSize3D*i     + nextY.x*blockSize3D*(j+1),
+                       origin3.y + nextX.y*blockSize3D*i     + nextY.y*blockSize3D*(j+1),
+                       origin3.z + nextX.z*blockSize3D*i     + nextY.z*blockSize3D*(j+1));
             glEnd();
           }
         }
@@ -471,9 +464,9 @@ void Maze_3D::Draw3D()
           int i = ghost[n].x;
           int j = ghost[n].y;
 
-          x = (double)(origin3.x + nextX.x*blockSize_3D*i + nextY.x*blockSize_3D*j);
-          y = (double)(origin3.y + nextX.y*blockSize_3D*i + nextY.y*blockSize_3D*j);
-          z = (double)(origin3.z + nextX.z*blockSize_3D*i + nextY.z*blockSize_3D*j);
+          x = (double)(origin3.x + nextX.x*blockSize3D*i + nextY.x*blockSize3D*j);
+          y = (double)(origin3.y + nextX.y*blockSize3D*i + nextY.y*blockSize3D*j);
+          z = (double)(origin3.z + nextX.z*blockSize3D*i + nextY.z*blockSize3D*j);
 
           switch(orientation){
             case 'T':
@@ -528,8 +521,8 @@ void Maze_3D::Draw3D()
 void Maze_3D::DrawPell(double drawX, double drawY, double drawZ) {
 	double x_2D, y_2D;
   double unit = 2.333334;
-	for (y_2D = 0.0; y_2D < blockSize_3D; y_2D+=unit) {
-		for (x_2D = 0.0; x_2D < blockSize_3D; x_2D+=unit) {
+	for (y_2D = 0.0; y_2D < blockSize3D; y_2D+=unit) {
+		for (x_2D = 0.0; x_2D < blockSize3D; x_2D+=unit) {
       int bit = (int)((x_2D/unit)+((y_2D/unit)*3));
 			if (patternPell[bit] == '0') glColor3ub(255,255,255);
       else glColor3ub(0,0,0);
@@ -553,8 +546,8 @@ void Maze_3D::DrawPell(double drawX, double drawY, double drawZ) {
 
 void Maze_3D::DrawSuperPell(double drawX, double drawY, double drawZ) {
 	double x_2D, y_2D;
-	for (y_2D = 0.0; y_2D < blockSize_3D; y_2D+=0.5) {
-		for (x_2D = 0.0; x_2D < blockSize_3D; x_2D+=0.5) {
+	for (y_2D = 0.0; y_2D < blockSize3D; y_2D+=0.5) {
+		for (x_2D = 0.0; x_2D < blockSize3D; x_2D+=0.5) {
       int bit = (int)((x_2D*2)+((y_2D*2)*14));
 			if      (patternSuperPell[bit] == '0') glColor3ub(255,255,50);
       else if (patternSuperPell[bit] == '1') glColor3ub(255,155,50);
@@ -579,8 +572,8 @@ void Maze_3D::DrawSuperPell(double drawX, double drawY, double drawZ) {
 
 void Maze_3D::DrawCherry(double drawX, double drawY, double drawZ) {
 	double x_2D, y_2D;
-	for (y_2D = 0.0; y_2D < blockSize_3D; y_2D+=0.5) {
-		for (x_2D = 0.0; x_2D < blockSize_3D; x_2D+=0.5) {
+	for (y_2D = 0.0; y_2D < blockSize3D; y_2D+=0.5) {
+		for (x_2D = 0.0; x_2D < blockSize3D; x_2D+=0.5) {
       int bit = (int)((x_2D*2)+((y_2D*2)*14));
 			if      (patternCherry[bit] == '0') glColor3ub(255,255,255);
 			else if (patternCherry[bit] == '1') glColor3ub(242,  0,  0);
@@ -606,20 +599,20 @@ void Maze_3D::DrawCherry(double drawX, double drawY, double drawZ) {
 
 void Maze_3D::DrawPacMan(double drawX, double drawY, double drawZ) {
 	double x_2D, y_2D;
-	for (y_2D = 0.0; y_2D < blockSize_3D; y_2D+=0.5) {
-		for (x_2D = 0.0; x_2D < blockSize_3D; x_2D+=0.5) {
+	for (y_2D = 0.0; y_2D < blockSize3D; y_2D+=0.5) {
+		for (x_2D = 0.0; x_2D < blockSize3D; x_2D+=0.5) {
       double i=x_2D, j=y_2D;
       if (cursor.xdir == -1 && cursor.ydir == 0) { // left
-        i = (blockSize_3D-0.5) - x_2D;
+        i = (blockSize3D-0.5) - x_2D;
         j = y_2D;
       }
       else if (cursor.xdir == 0 && cursor.ydir == 1) { // up
         i = y_2D;
-        j = (blockSize_3D-0.5) - x_2D;
+        j = (blockSize3D-0.5) - x_2D;
       }
       else if (cursor.xdir == 0 && cursor.ydir == -1) { // down
-        i = (blockSize_3D-0.5) - y_2D;
-        j = (blockSize_3D-0.5) - x_2D;
+        i = (blockSize3D-0.5) - y_2D;
+        j = (blockSize3D-0.5) - x_2D;
       }
 
       int bit = (int)((i*2)+((j*2)*14));
@@ -649,8 +642,8 @@ void Maze_3D::DrawGhost(double drawX, double drawY, double drawZ, int xdir, int 
 	double x_2D, y_2D;
   //int i, j;
 
-  for (y_2D = 0.0; y_2D < blockSize_3D; y_2D+=0.5) {
-		for (x_2D = 0.0; x_2D < blockSize_3D; x_2D+=0.5) {
+  for (y_2D = 0.0; y_2D < blockSize3D; y_2D+=0.5) {
+		for (x_2D = 0.0; x_2D < blockSize3D; x_2D+=0.5) {
       int bit = (int)((x_2D*2)+((y_2D*2)*14));
       if (cursor.powerState) {
         if      (patternVulnerableGhost[bit] == '_') glColor3ub(150,  0,255);
@@ -806,7 +799,6 @@ void FullMaze_3D::SetCursor(Agent pacman){
 
 void FullMaze_3D::Draw(){
   for(int i = 1;i < 5;i++){
-    //printf("full: %d\n", i);
     maze[i].Draw3D();
   }
 }
