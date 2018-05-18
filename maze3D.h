@@ -46,7 +46,7 @@ class Maze_3D{
 
   public:
     Coord_3D cursor;
-    vector<Ghost> ghost;
+    vector<Agent> ghost;
     Maze_3D();
     ~Maze_3D();
     void SetPatterns();
@@ -470,8 +470,7 @@ void Maze_3D::Draw3D()
         for(int n=0; n<ghost.size(); n++) {
           int i = ghost[n].x;
           int j = ghost[n].y;
-          int xdir = ghost[n].xdir;
-          int ydir = ghost[n].ydir;
+
           x = (double)(origin3.x + nextX.x*blockSize_3D*i + nextY.x*blockSize_3D*j);
           y = (double)(origin3.y + nextX.y*blockSize_3D*i + nextY.y*blockSize_3D*j);
           z = (double)(origin3.z + nextX.z*blockSize_3D*i + nextY.z*blockSize_3D*j);
@@ -496,7 +495,31 @@ void Maze_3D::Draw3D()
               x += 0.75;
               break;
           }
-          DrawGhost(x,y,z,xdir,ydir);
+		  int dir = ghost[n].dir;
+          int xdir, ydir;
+		  switch(dir){
+		  	case DIR_RIGHT:
+				xdir = 1;
+				ydir = 0;
+				break;
+		  	case DIR_DOWN:
+				xdir = 0;
+				ydir = 1;
+				break;
+		  	case DIR_UP:
+				xdir = 0;
+				ydir = -1;
+				break;
+		  	case DIR_LEFT:
+				xdir = -1;
+				ydir = 0;
+				break;
+		  	default:
+				xdir = 1;
+				ydir = 0;
+				break;
+		  }
+		  DrawGhost(x, y, z, xdir, ydir);
         }
       }
     }
@@ -689,8 +712,8 @@ class FullMaze_3D{
     void Print();
     void PrintGhost();
     void SetMaze(int ***);
-    void SetCursor(PacMan);
-    void SetGhost(vector<Ghost> *ghostInfo);
+    void SetCursor(Agent);
+    void SetGhost(vector<Agent> *ghostInfo);
     const void ReturnMaze(int***)const;
 };
 
@@ -716,7 +739,7 @@ void FullMaze_3D::PrintGhost(){
   printf("\n");
 }
 
-void FullMaze_3D::SetGhost(vector<Ghost> *ghostInfo){
+void FullMaze_3D::SetGhost(vector<Agent> *ghostInfo){
   int n = ghostInfo->size();
   for(int i = 0;i < 6;i++){
     maze[i].ghost.clear();
@@ -727,7 +750,7 @@ void FullMaze_3D::SetGhost(vector<Ghost> *ghostInfo){
   }
 }
 
-void FullMaze_3D::SetCursor(PacMan pacman){
+void FullMaze_3D::SetCursor(Agent pacman){
   switch(pacman.surface){
     case 0:
       curSurface = 'T';
@@ -750,8 +773,6 @@ void FullMaze_3D::SetCursor(PacMan pacman){
   }
   cursor.x    = pacman.x;
   cursor.y    = pacman.y;
-  cursor.xdir = pacman.xdir;
-  cursor.ydir = pacman.ydir;
 
 
 

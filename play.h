@@ -30,8 +30,8 @@ protected:
 	FullMaze maze;
 	FullMaze_3D maze_3d;
 	int ***mazeArray;
-	PacMan pacInfo;
-	vector<Ghost> ghostInfo;
+	Agent pacInfo;
+	vector<Agent> ghostInfo;
 	time_t t0, dt, timeMax, timeLeft;
 	int lives, countDown, loopCount, totalPells;
    	bool setCherry, setPower; 
