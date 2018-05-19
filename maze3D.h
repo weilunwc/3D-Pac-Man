@@ -29,6 +29,8 @@ protected:
     int curState; // 0 not in this surface, 1 not clear box, 2 clear box
     char orientation;
     Color baseColor; // R,G,B
+	
+
 
 public:
     Coord_3D cursor;
@@ -47,7 +49,7 @@ public:
     
 	/* Below is mine */
 	void DrawPacman(Agent &pacman);
-	void DrawGhost(Agent &ghost);
+	void DrawGhost(Agent &ghost, bool powerState);
 
 	
 	
@@ -569,7 +571,7 @@ void Maze3D::DrawPacman(Agent &pacman){
 	
 }
 
-void Maze3D::DrawGhost(Agent &ghost){
+void Maze3D::DrawGhost(Agent &ghost, bool powerState){
 	/* Load coordinates */
 	int x = ghost.x;
 	int y = ghost.y;
@@ -588,7 +590,7 @@ void Maze3D::DrawGhost(Agent &ghost){
     for (y_2D = 0.0; y_2D < blockSize3D; y_2D+=0.5) {
         for (x_2D = 0.0; x_2D < blockSize3D; x_2D+=0.5) {
             int bit = (int)((x_2D*2)+((y_2D*2)*14));
-            if (cursor.powerState) {
+            if (powerState) {
                 if      (patternVulnerableGhost[bit] == '_') glColor3ub(150,  0,255);
                 else if (patternVulnerableGhost[bit] == '1') glColor3ub(  0,  0,  0);
                 else glColor3ub(0,0,0);
@@ -931,7 +933,8 @@ class FullMaze3D{
         Coord_3D cursor;
         char curSurface;
         int curState; // 1 for not clear, 2 for clear box
-    public:
+    	bool powerState;
+	public:
         FullMaze3D();
         void Draw();
         void SetMaze(int ***);
@@ -942,7 +945,9 @@ class FullMaze3D{
 		void DrawMaze(int *** fullMaze);
 		void DrawPacman(Agent &pacman);
 		void DrawGhost(vector<Agent> &ghost);
+		void DrawMaze(Maze* fullMaze);
 
+		void ActivatePowerState();
 };
 
 FullMaze3D::FullMaze3D(){
@@ -953,6 +958,12 @@ FullMaze3D::FullMaze3D(){
 	maze[SURFACE_S].SetOrientation(SURFACE_S);
 	maze[SURFACE_E].SetOrientation(SURFACE_E);
 	maze[SURFACE_B].SetOrientation(SURFACE_B);
+	powerState = false;
+}
+
+
+void FullMaze3D::ActivatePowerState(){
+	powerState = true;
 }
 
 
@@ -1006,7 +1017,7 @@ void FullMaze3D::SetPacman(Agent pacman){
         case 'W':
             maze[2].Activate(cursor,curState);
             break;
-        case 'S':
+        case 'S':V
             maze[3].Activate(cursor,curState);
             break;
         case 'E':
@@ -1055,10 +1066,18 @@ void FullMaze3D::DrawGhost(vector<Agent> &ghost){
 	int n = ghost.size();
 	for(int i = 0;i < n;i++){
 		int surface = ghost[i].surface;
-		maze[surface].DrawGhost(ghost[i]);
+		maze[surface].DrawGhost(ghost[i], powerState);
 	}
 }
 
-
+void FullMaze3D::DrawMaze(Maze* fullMaze){
+	for(int i = 0;i < 6;i++){
+		for(int j = 0;j < blockNumber;j++){
+			for(int k = 0;k < blockNumber;k++){
+				maze[i].DrawMaze(k, j, fullMaze[i].ReturnElement(k,j));
+			}
+		}
+	}
+}
 
 #endif

@@ -188,6 +188,7 @@ void Play::Step(int pacCmd, int ghostCmd, int &pacReward, int &ghostReward){
 			break;
 		case EAT_SUPERPELL:
 			pacReward = 20;
+			maze3D.ActivatePowerState();
 			break;
 		default:
 			pacReward = 0;
@@ -199,6 +200,7 @@ void Play::Step(int pacCmd, int ghostCmd, int &pacReward, int &ghostReward){
 		if(collision == COLL_EATPAC){
 			musicPlayer.Stop(pacman_death);
 			musicPlayer.PlayOneShot(pacman_death);
+			
 			lives--;
 			maze.SwitchGhost();
 			ghostReward += 500;
@@ -388,9 +390,9 @@ void Play::Draw3DMaze(){
 	
 	/* Draw Cube, Pacman, Ghost */
 
-	//maze3D.DrawPacman(pacInfo);
-	//maze3D.DrawGhost(ghostInfo);
-	maze3D.DrawMaze(mazeArray);
+	maze3D.DrawPacman(maze.ReturnPacman());
+	maze3D.DrawGhost(maze.ReturnGhost());
+	maze3D.DrawMaze(maze.ReturnMaze());
 
 	/* Plot the ghost camera view */
 	ghostView.CameraFollow(ghostInfo[ghostNow].surface, ghostInfo[ghostNow].x, 
@@ -404,6 +406,7 @@ void Play::Draw3DMaze(){
 	}
 	ghostView.SetView();
 	//maze3D.Draw();
+	
 	//maze3D.DrawPacman(pacInfo);
 	//maze3D.DrawGhost(ghostInfo);
 	maze3D.DrawMaze(mazeArray);

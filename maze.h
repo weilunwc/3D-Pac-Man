@@ -436,6 +436,9 @@ public:
 	void SetSuperPells();
 	const void ReturnMaze(int***) const;
 	
+	Agent &ReturnPacman();
+	vector<Agent> &ReturnGhost();
+	Maze* ReturnMaze();	
 
 
 	void ReturnPacman(Agent &pacInfo);
@@ -445,6 +448,17 @@ public:
 	void AgentMove(Agent &agent);
 
 };
+
+Agent &FullMaze::ReturnPacman(){
+	return pacman;
+}
+vector<Agent> &FullMaze::ReturnGhost(){
+	return ghost;
+}
+
+Maze* FullMaze::ReturnMaze(){
+	return maze;
+}
 
 
 void FullMaze::Restart(){
