@@ -28,7 +28,7 @@ protected:
 	bool plot3d;
 	View ghostView, pacView;
 	FullMaze maze;
-	FullMaze_3D maze_3d;
+	FullMaze3D maze3D;
 	int ***mazeArray;
 	Agent pacInfo;
 	vector<Agent> ghostInfo;
@@ -103,7 +103,7 @@ void Play::Setup(){
 	maze.SetMaze(); // load map
 	
 	/* Game parameters */
-	timeMax = 10;
+	timeMax = 60;
 
 	/* Set up music */
 	musicPlayer.MakeCurrent();
@@ -182,6 +182,8 @@ void Play::Step(int pacCmd, int ghostCmd, int &pacReward, int &ghostReward){
 			pacReward = 1;
 			break;
 		case EAT_CHERRY:
+			musicPlayer.Stop(cherry);
+			musicPlayer.PlayOneShot(cherry);
 			pacReward = 20;
 			break;
 		case EAT_SUPERPELL:
@@ -382,12 +384,18 @@ void Play::Draw3DMaze(){
 		glViewport(-wid/4,0,wid,hei);
 	}
 	pacView.SetView();
-	maze_3d.Draw();
+	//maze3D.Draw();
 	
+	/* Draw Cube, Pacman, Ghost */
+
+	//maze3D.DrawPacman(pacInfo);
+	//maze3D.DrawGhost(ghostInfo);
+	maze3D.DrawMaze(mazeArray);
+
 	/* Plot the ghost camera view */
 	ghostView.CameraFollow(ghostInfo[ghostNow].surface, ghostInfo[ghostNow].x, 
 								ghostInfo[ghostNow].y);
-	/* Plot on two sides */
+
 	if(exchangePlayers == false){
 		glViewport(-wid/4,0,wid,hei);
 	}
@@ -395,7 +403,10 @@ void Play::Draw3DMaze(){
 		glViewport(wid/4,0,wid,hei);
 	}
 	ghostView.SetView();
-	maze_3d.Draw();
+	//maze3D.Draw();
+	//maze3D.DrawPacman(pacInfo);
+	//maze3D.DrawGhost(ghostInfo);
+	maze3D.DrawMaze(mazeArray);
 
 	/* Reset 2D to display other 2D objects */
 	glMatrixMode(GL_PROJECTION);
@@ -496,9 +507,9 @@ void Play::Update3DMaze(){
 	maze.ReturnGhost(ghostInfo);
 
 	/* Load data to 3d maze */
-	maze_3d.SetMaze(mazeArray);
-	maze_3d.SetCursor(pacInfo);
-	maze_3d.SetGhost(&ghostInfo);
+	maze3D.SetMaze(mazeArray);
+	maze3D.SetPacman(pacInfo);
+	maze3D.SetGhost(&ghostInfo);
 }
 
 

@@ -98,11 +98,12 @@ enum
 	EAT_SUPERPELL
 };
 
-/* the pacman x,y coordinates*/
-typedef struct CoordStruct{
+/* defines position */
+typedef struct VectorStruct{
 	int x;
 	int y;
-}Coord;
+	int z;
+}Vector;
 
 /* the rgb information */
 typedef struct ColorStruct{
@@ -121,11 +122,37 @@ typedef struct AgentStruct{
 	bool powerState;
 }Agent;
 
+
+/* Returns x y direction from direction */
+void Dir2XY(int dir, int &xdir, int &ydir){
+	switch(dir){
+		case DIR_UP:
+			xdir = 0;
+			ydir = -1;
+			break;
+		case DIR_DOWN:
+			xdir = 0;
+			ydir = 1;
+			break;
+		case DIR_LEFT:
+			xdir = -1;
+			ydir = 0;
+			break;
+		case DIR_RIGHT:
+			xdir = 1;
+			ydir = 0;
+		default:
+			xdir = 1;
+			ydir = 0;
+	}
+}
+
+
 /* A maze on a single surface, uses an array to representeach block */
 class Maze{
 protected:
 	int **maze;
-	Coord origin; // the (0,0) point on the global coordinates
+	Vector origin; // the (0,0) point on the global coordinates
 	Color baseColor; // R,G,B
 
 public:
@@ -408,6 +435,9 @@ public:
 	void SetCherry();
 	void SetSuperPells();
 	const void ReturnMaze(int***) const;
+	
+
+
 	void ReturnPacman(Agent &pacInfo);
 	void ReturnGhost(vector<Agent> &ghostInfo);
 	void SwitchGhost();
@@ -434,6 +464,8 @@ void FullMaze::Restart(){
 	pacman.y = 12;
 	pacman.prevX = 8;
 	pacman.prevY = 12;
+	pacman.dir = DIR_STOP;
+	
 	pacman.powerState = false;
 	pells = 0;
 	ghostLives = ghostNumber;
@@ -516,6 +548,7 @@ void FullMaze::Restore(){
 	curState = 1;
 	pacman.x = 8;
 	pacman.y = 12;
+	pacman.dir = DIR_STOP;
 	for(int i = 0;i < 6;i++){
 	}
 	ghost.resize(ghostLives);
@@ -624,6 +657,7 @@ void FullMaze::ReturnPacman(Agent &pacInfo){
 	pacInfo.y = pacman.y;
 	pacInfo.surface = pacman.surface;
 	pacInfo.powerState = pacman.powerState;
+	pacInfo.dir = pacman.dir;
 }
 
 /* Load from text and build maze */
@@ -953,7 +987,6 @@ int FullMaze::PacMove(){
 	pacman.prevX = pacman.x;
 	pacman.prevY = pacman.y;
 	prevSurface = pacman.surface;
-
 	AgentMove(pacman);
 	
 	/* The moved parameters */

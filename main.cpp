@@ -233,7 +233,6 @@ int main(void){
 							finishGame = true;
 						}
 						else{
-							cout << "sup" << endl;
 							exchangePlayers = true;
 							play.Restart(exchangePlayers);
 						}
