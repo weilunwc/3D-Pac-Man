@@ -16,7 +16,6 @@
 #include "score.h"
 
 
-
 class Play{
 protected:
     /* Fancy Decoration */
@@ -29,9 +28,13 @@ protected:
 	View ghostView, pacView;
 	FullMaze maze;
 	FullMaze3D maze3D;
-	int ***mazeArray;
+
+	/* Maze Information */
 	Agent pacInfo;
 	vector<Agent> ghostInfo;
+	int*** mazeInfo;
+	bool powerState;
+
 	time_t t0, dt, timeMax, timeLeft;
 	int lives, countDown, loopCount;
    	bool setCherry, setPower; 
@@ -70,6 +73,15 @@ public:
 Play::Play(){
 	Setup();
 	plot3d = false;
+	
+
+
+}
+
+Play::Play(bool visualize, bool plot3d){
+	if(visualize == true) FsOpenWindow(0, 100, 1600, 600, 1);
+	this->plot3d = plot3d;
+	Setup();
 }
 
 /* Render - Assumes main function is only running game */
@@ -79,22 +91,16 @@ void Play::Render(){
 	FsSwapBuffers();
 }
 
-Play::Play(bool visualize, bool plot3d){
-	if(visualize == true) FsOpenWindow(0, 100, 1600, 600, 1);
-	this->plot3d = plot3d;
-	Setup();
-	if(plot3d == true){
-		mazeArray = new int**[6];
-		for(int i = 0;i < 6;i++){
-			mazeArray[i] = new int*[blockNumber];
-			for(int j = 0;j < blockNumber;j++){
-				mazeArray[i][j] = new int[blockNumber];
-			}
+void Play::Setup(){
+	
+	/* Setup maze */
+	mazeInfo = new int**[6];
+	for(int i = 0;i < 6;i++){
+		mazeInfo[i] = new int*[blockNumber];
+		for(int j = 0;j < blockNumber;j++){
+			mazeInfo[i][j] = new int[blockNumber];	
 		}
 	}
-}
-
-void Play::Setup(){
     /* Set up background */
 	img.Decode("graphs/PlayBackground.png");
     img.Flip();
@@ -104,6 +110,7 @@ void Play::Setup(){
 	
 	/* Game parameters */
 	timeMax = 60;
+	powerState = false;
 
 	/* Set up music */
 	musicPlayer.MakeCurrent();
@@ -189,6 +196,7 @@ void Play::Step(int pacCmd, int ghostCmd, int &pacReward, int &ghostReward){
 		case EAT_SUPERPELL:
 			pacReward = 20;
 			maze3D.ActivatePowerState();
+			powerState = true;
 			break;
 		default:
 			pacReward = 0;
@@ -275,6 +283,7 @@ void Play::Restart(bool exchangePlayers){
 	loopCount = 0;
 	setPower = false;
 	setCherry = false;
+	powerState = false;
 	/* Play start music */
 	musicPlayer.Stop(areyouready);
 	musicPlayer.PlayOneShot(areyouready);
@@ -285,6 +294,7 @@ void Play::Restart(){
 	musicPlayer.KeepPlaying();
 	maze.Restart();
 	exchangePlayers = false;
+	powerState = false;
 	
 	t0 = time(NULL);
 	timeLeft = timeMax;
@@ -297,72 +307,6 @@ void Play::Restart(){
 	/* Play start music */
 	musicPlayer.Stop(areyouready);
 	musicPlayer.PlayOneShot(areyouready);
-}
-
-void Play::SendMazeCommand(int key){
-	if(exchangePlayers == false){
-		switch(key){
-			case FSKEY_LEFT:
-				maze.ChangePacDirection(1);
-				break;
-			case FSKEY_UP:
-				maze.ChangePacDirection(2);
-				break;
-			case FSKEY_RIGHT:
-				maze.ChangePacDirection(3);
-				break;
-			case FSKEY_DOWN:
-				maze.ChangePacDirection(4);
-				break;
-			case FSKEY_A:
-				maze.ChangeGhostDirection(1);
-				break;
-			case FSKEY_W:
-				maze.ChangeGhostDirection(2);
-				break;
-			case FSKEY_D:
-				maze.ChangeGhostDirection(3);
-				break;
-			case FSKEY_S:
-				maze.ChangeGhostDirection(4);
-				break;
-			case FSKEY_1:
-				maze.SwitchGhost();
-				break;
-		}
-	}
-	else{
-		switch(key){
-			case FSKEY_A:
-				maze.ChangePacDirection(1);
-				break;
-			case FSKEY_W:
-				maze.ChangePacDirection(2);
-				break;
-			case FSKEY_D:
-				maze.ChangePacDirection(3);
-				break;
-			case FSKEY_S:
-				maze.ChangePacDirection(4);
-				break;
-			case FSKEY_LEFT:
-				maze.ChangeGhostDirection(1);
-				break;
-			case FSKEY_UP:
-				maze.ChangeGhostDirection(2);
-				break;
-			case FSKEY_RIGHT:
-				maze.ChangeGhostDirection(3);
-				break;
-			case FSKEY_DOWN:
-				maze.ChangeGhostDirection(4);
-				break;
-			case FSKEY_M:
-				maze.SwitchGhost();
-				break;
-		}
-	}
-
 }
 
 void Play::Draw2DMaze(){
@@ -386,13 +330,12 @@ void Play::Draw3DMaze(){
 		glViewport(-wid/4,0,wid,hei);
 	}
 	pacView.SetView();
-	//maze3D.Draw();
 	
 	/* Draw Cube, Pacman, Ghost */
+	maze3D.DrawPacman(pacInfo);
+	maze3D.DrawGhost(ghostInfo);
+	maze3D.DrawMaze(mazeInfo);
 
-	maze3D.DrawPacman(maze.ReturnPacman());
-	maze3D.DrawGhost(maze.ReturnGhost());
-	maze3D.DrawMaze(maze.ReturnMaze());
 
 	/* Plot the ghost camera view */
 	ghostView.CameraFollow(ghostInfo[ghostNow].surface, ghostInfo[ghostNow].x, 
@@ -405,11 +348,11 @@ void Play::Draw3DMaze(){
 		glViewport(wid/4,0,wid,hei);
 	}
 	ghostView.SetView();
-	//maze3D.Draw();
 	
-	//maze3D.DrawPacman(pacInfo);
-	//maze3D.DrawGhost(ghostInfo);
-	maze3D.DrawMaze(mazeArray);
+	/* Draw Cube, Pacman, Ghost */
+	maze3D.DrawPacman(maze.ReturnPacman());
+	maze3D.DrawGhost(maze.ReturnGhost());
+	maze3D.DrawMaze(mazeInfo);
 
 	/* Reset 2D to display other 2D objects */
 	glMatrixMode(GL_PROJECTION);
@@ -505,14 +448,29 @@ void Play::Draw(){
 
 /* Read data from 2d Maze and load to 3d maze */
 void Play::Update3DMaze(){
-	maze.ReturnMaze(mazeArray);
 	maze.ReturnPacman(pacInfo);
 	maze.ReturnGhost(ghostInfo);
-
-	/* Load data to 3d maze */
-	maze3D.SetMaze(mazeArray);
-	maze3D.SetPacman(pacInfo);
-	maze3D.SetGhost(&ghostInfo);
+	maze.ReturnMaze(mazeInfo);
+	
+	/*
+	 *  Update mazeInfo on pacman and ghost state, this lets the 
+	 *  Drawing function to not draw them so that there won't be 
+	 *  overlapping, and also enables RL state info 
+	 */
+	int surface, x, y;
+	surface = pacInfo.surface;
+	x = pacInfo.x;
+	y = pacInfo.y;
+	mazeInfo[surface][x][y] = MAZE_PACMAN;
+	
+	int n = ghostInfo.size();
+	for(int i = 0;i < n;i++){
+		surface = ghostInfo[i].surface;
+		x = ghostInfo[i].x;
+		y = ghostInfo[i].y;
+		if(powerState == false) mazeInfo[surface][x][y] = MAZE_GHOST;
+		else mazeInfo[surface][x][y] = MAZE_VULNERGHOST;
+	}
 }
 
 
