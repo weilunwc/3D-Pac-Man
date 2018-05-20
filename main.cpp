@@ -142,7 +142,7 @@ int main(void){
 	bool plot3d = true, visualize = true;
 	Play play(visualize, plot3d);
 	
-	FsOpenWindow(0,100,1600,600,1);
+	FsOpenWindow(0, 100, 1600, 600, 1);
 	FsPollDevice();
 	int key = FsInkey();
 	int gameState = GAME_MENU;
@@ -165,6 +165,15 @@ int main(void){
 	}
 	musicPlayer.PlayBackground(scene);	
 	
+	int*** observation;
+	observation = new int**[6];
+	for(int i = 0;i < 6;i++){
+		observation[i] = new int*[25];
+		for(int j = 0;j < 25;j++){
+			observation[i][j] = new int[25];
+		}
+	}
+
 	/* Start game */	
 	while(key != FSKEY_ESC){
 		switch(gameState){
@@ -200,6 +209,8 @@ int main(void){
 					FsPollDevice();
 					key = FsInkey();
 					if(key == FSKEY_SPACE) pause = !pause;	
+					bool done = false;
+					
 					if(pause == false){
 						if(play.CheckCountDown()){
 							/* Send keyboard signals through env API */
@@ -208,7 +219,7 @@ int main(void){
 							int pacReward, ghostReward;
 							pacReward = 0;
 							ghostReward = 0;
-							play.Step(pacCmd, ghostCmd, pacReward, ghostReward);
+							play.Step(pacCmd, ghostCmd, observation, pacReward, ghostReward, done);
 							
 							if(exchangePlayers == false){
 								score1 += pacReward;
@@ -228,7 +239,7 @@ int main(void){
 					play.Draw();
 
 					/* Check end conditions */
-					if(play.CheckEndCondition()){
+					if(done == true){
 						if(exchangePlayers == true){
 							finishGame = true;
 						}

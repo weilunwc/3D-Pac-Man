@@ -6,7 +6,6 @@ using namespace std;
 
 extern int blockSize3D; // Giada's Modification
 extern const int blockNumber;
-extern double myPi;
 
 class Maze3D{
 protected:
@@ -292,7 +291,6 @@ void Maze3D::SetOrientation(char orient){
             yDir.y   = -1;
             yDir.z   =  0;
             break;
-
     }
 }
 
@@ -490,7 +488,6 @@ void Maze3D::DrawPacman(Agent &pacman){
 			DrawBit(drawX, drawY, drawZ, unit, i, j);
 		}
 	}
-	
 }
 
 void Maze3D::DrawGhost(Agent &ghost, bool powerState){

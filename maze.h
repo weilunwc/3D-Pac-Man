@@ -194,21 +194,21 @@ Maze::~Maze(){
 	delete [] maze;
 }
 void Maze::SetCherry(){
-	int x = rand()%blockNumber;
-	int y = rand()%blockNumber;
+	int x = rand() % blockNumber;
+	int y = rand() % blockNumber;
 	while(maze[x][y] == MAZE_WALL){
-		x = rand()%blockNumber;
-		y = rand()%blockNumber;
+		x = rand() % blockNumber;
+		y = rand() % blockNumber;
 	}
 	maze[x][y] = MAZE_CHERRY;
 }
 
 void Maze::SetSuperPells(){
-	int x = rand()%blockNumber;
-	int y = rand()%blockNumber;
+	int x = rand() % blockNumber;
+	int y = rand() % blockNumber;
 	while(maze[x][y] == MAZE_WALL){
-		x = rand()%blockNumber;
-		y = rand()%blockNumber;
+		x = rand() % blockNumber;
+		y = rand() % blockNumber;
 	}
 	maze[x][y] = MAZE_SUPERPELL;
 }
@@ -290,7 +290,6 @@ void Maze::SetOrientation(int surface){
 			origin.x = 3 * blockNumber * blockSize2D;
 			origin.y = blockNumber * blockSize2D;
 			break;
-
 	}
 }
 
@@ -325,7 +324,7 @@ void Maze::DrawPacman(int pacX, int pacY){
 	double x = (double)(origin.x + blockSize2D*pacX + blockSize2D/2);
 	double y = (double)(origin.y + blockSize2D*pacY + blockSize2D/2);
 	double r = blockSize2D/2;
-	glColor3ub(0,0,100);
+	glColor3ub(0, 0, 100);
 	glBegin(GL_POLYGON);
 	for(int i = 0;i < 64;i++){
 		double angle = (double)i*myPi/32.0;
@@ -492,16 +491,18 @@ void FullMaze::Restart(){
 	int s = 1;
 	ghostControl = 5;
 	for(int i = 0;i < ghostLives;i++){
+		/* direction */
 		if(i != ghostControl){
 			GhostRandom(ghost[i]);
 		}
 		else{
 			ghost[i].dir = DIR_STOP;
 		}
+		/* position */
 		ghost[i].surface = s;
-		ghost[i].x = k+11;
+		ghost[i].x = k + 11;
 		ghost[i].y = 11;
-		ghost[i].prevX = k+11;
+		ghost[i].prevX = k + 11;
 		ghost[i].prevY = 11;
 		k++;
 		j++;
@@ -526,11 +527,11 @@ void FullMaze::GhostChase(int ghostIndex) {
 	int prevy = ghost[index].y;
 
 	if (distx < disty) {
-		if (x > prevx) ghost[index].dir = DIR_RIGHT;
+		if (x < prevx) ghost[index].dir = DIR_RIGHT;
 		else ghost[index].dir = DIR_LEFT; 
 	}
 	else {
-		if (y > prevy) ghost[index].dir = DIR_UP;
+		if (y < prevy) ghost[index].dir = DIR_UP;
 		else ghost[index].dir = DIR_DOWN; 
 	}
 }
@@ -566,13 +567,11 @@ void FullMaze::Restore(){
 	pacman.x = 8;
 	pacman.y = 12;
 	pacman.dir = DIR_STOP;
-	for(int i = 0;i < 6;i++){
-	}
 	ghost.resize(ghostLives);
 	int j = 0;
 	int k = 0;
 	int s = 1;
-	ghostControl = ghostLives%6;
+	ghostControl = ghostLives % 6;
 	for(int i = 0;i < ghostLives;i++){
 		if(i != ghostControl){
 			GhostRandom(ghost[i]);
@@ -616,22 +615,10 @@ int FullMaze::CollisionDetect(){
 			}
 			else{
 				/* Eat ghost i */
-				if(n > 1){
-					ghost.erase(ghost.begin() + i);
-					ghostLives--;
-					ghostControl = rand()%ghostLives;
-					ghost_eaten++;
-				}
-				else{
-					int i = 0;
-					ghost[i].dir = DIR_STOP;
-					ghost[i].surface = 1 + rand()%4;
-					ghost[i].x = 11;
-					ghost[i].y = 11;
-					ghost[i].prevX = 11;
-					ghost[i].prevY = 11;
-
-				}
+				ghost.erase(ghost.begin() + i);
+				ghostLives--;
+				if(ghostLives > 0) ghostControl = rand()%ghostLives;
+				else ghostControl = -1;
 				return COLL_EATGHOST;
 			}
 		}
@@ -701,7 +688,7 @@ void FullMaze::Print(){
 	}
 }
 
-const void FullMaze::ReturnMaze(int *** output)const{
+const void FullMaze::ReturnMaze(int *** output) const{
 	for(int k = 0;k < 6;k++){
 		for(int i = 0;i < blockNumber;i++){
 			for(int j = 0;j < blockNumber;j++){

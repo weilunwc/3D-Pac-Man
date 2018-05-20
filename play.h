@@ -58,7 +58,8 @@ public:
 	void Restart(bool exchangePlayers);
 	void Restart();
 	void Draw();
-	void Step(int pacCmd, int ghostCmd, int &pacReward, int &ghostReward);
+	void Step(int pacCmd, int ghostCmd, int*** observation, int &pacReward, int &ghostReward,
+			bool &done);
 	void PacStep(int cmd, int &reward);
 	void GhostStep(int cmd, int &reward);
 
@@ -73,8 +74,6 @@ public:
 Play::Play(){
 	Setup();
 	plot3d = false;
-	
-
 
 }
 
@@ -164,7 +163,7 @@ bool Play::CheckEndCondition(){
 }
 
 void Play::UpdateGame(){
-	// all data is set here, display
+	/* place cherry and superpells on specific time */
 	if(dt > timeMax*(1.0/3.0) && setCherry == false){
 		maze.SetCherry();
 		setCherry = true;
@@ -173,11 +172,10 @@ void Play::UpdateGame(){
 		maze.SetSuperPells();
 		setPower = true;
 	}
-	
 }
 
 /* Sends commands in two player mode and updates game and score */
-void Play::Step(int pacCmd, int ghostCmd, int &pacReward, int &ghostReward){
+void Play::Step(int pacCmd, int ghostCmd, int*** observation, int &pacReward, int &ghostReward, bool &done){
 	/* Send command */
 	maze.ChangePacDirection(pacCmd);
 	maze.ChangeGhostDirection(ghostCmd);
@@ -225,8 +223,18 @@ void Play::Step(int pacCmd, int ghostCmd, int &pacReward, int &ghostReward){
 	
 	UpdateTime();
 	UpdateGame();
+	Update3DMaze();
 	loopCount++;
 	
+	/* return updated maze and if end */
+	done = CheckEndCondition();
+	for(int i = 0;i < 6;i++){
+		for(int j = 0;j < 25;j++){
+			for(int k = 0;k < 25;k++){
+				observation[i][j][k] = mazeInfo[i][j][k];
+			}
+		}
+	}
 }
 
 /* Sends commands for pacman player only and updates game and score */
@@ -316,7 +324,9 @@ void Play::Draw2DMaze(){
 void Play::Draw3DMaze(){
 	Update3DMaze();
 	int ghostNow = maze.ReturnGhostControl();
-	
+	Agent ghostPlayer;
+	if(ghostNow == -1) ghostPlayer = pacInfo; // all ghosts are dead
+	else ghostPlayer = ghostInfo[ghostNow];
 	/* Store the window size */	
 	int wid,hei;
 	FsGetWindowSize(wid,hei);
@@ -338,8 +348,8 @@ void Play::Draw3DMaze(){
 
 
 	/* Plot the ghost camera view */
-	ghostView.CameraFollow(ghostInfo[ghostNow].surface, ghostInfo[ghostNow].x, 
-								ghostInfo[ghostNow].y);
+	ghostView.CameraFollow(ghostPlayer.surface, ghostPlayer.x, 
+								ghostPlayer.y);
 
 	if(exchangePlayers == false){
 		glViewport(-wid/4,0,wid,hei);
