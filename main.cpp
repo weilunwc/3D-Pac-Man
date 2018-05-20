@@ -199,7 +199,7 @@ int main(void){
 				pause = false;
 				finishGame = false;
 				exchangePlayers = false;
-				play.Restart(exchangePlayers);
+				play.Reset(exchangePlayers, observation);
 				score1 = 0;
 				score2 = 0;
 				/* Start game */
@@ -245,7 +245,7 @@ int main(void){
 						}
 						else{
 							exchangePlayers = true;
-							play.Restart(exchangePlayers);
+							play.Reset(exchangePlayers, observation);
 						}
 					}
 					

@@ -55,8 +55,8 @@ public:
 	Play(bool visualize, bool plot3d);
 	~Play(){musicPlayer.End();};
 
-	void Restart(bool exchangePlayers);
-	void Restart();
+	void Reset(bool exchangePlayers, int*** observation);
+	void Reset(int*** observation);
 	void Draw();
 	void Step(int pacCmd, int ghostCmd, int*** observation, int &pacReward, int &ghostReward,
 			bool &done);
@@ -277,8 +277,8 @@ void Play::GhostStep(int cmd, int &reward){
 	reward = 0;
 }
 
-/* Restart game */
-void Play::Restart(bool exchangePlayers){
+/* Reset game */
+void Play::Reset(bool exchangePlayers, int*** observation){
 	musicPlayer.KeepPlaying();
 	maze.Restart();
 	this->exchangePlayers = exchangePlayers;
@@ -295,10 +295,21 @@ void Play::Restart(bool exchangePlayers){
 	/* Play start music */
 	musicPlayer.Stop(areyouready);
 	musicPlayer.PlayOneShot(areyouready);
+	
+	/* return observation */
+	Update3DMaze();
+	for(int i = 0;i < 6;i++){
+		for(int j = 0;j < 25;j++){
+			for(int k = 0;k < 25;k++){
+				observation[i][j][k] = mazeInfo[i][j][k];
+			}
+		}
+	}
+	
 }
 
-/* Restart game */
-void Play::Restart(){
+/* Reset game */
+void Play::Reset(int*** observation){
 	musicPlayer.KeepPlaying();
 	maze.Restart();
 	exchangePlayers = false;
@@ -315,6 +326,15 @@ void Play::Restart(){
 	/* Play start music */
 	musicPlayer.Stop(areyouready);
 	musicPlayer.PlayOneShot(areyouready);
+	
+	Update3DMaze();
+	for(int i = 0;i < 6;i++){
+		for(int j = 0;j < 25;j++){
+			for(int k = 0;k < 25;k++){
+				observation[i][j][k] = mazeInfo[i][j][k];
+			}
+		}
+	}
 }
 
 void Play::Draw2DMaze(){
