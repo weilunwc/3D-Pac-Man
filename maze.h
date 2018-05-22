@@ -124,33 +124,6 @@ typedef struct AgentStruct{
 	bool powerState;
 }Agent;
 
-
-/* Returns x y direction from direction */
-/*
-void Dir2XY(int dir, int &xdir, int &ydir){
-	switch(dir){
-		case DIR_UP:
-			xdir = 0;
-			ydir = -1;
-			break;
-		case DIR_DOWN:
-			xdir = 0;
-			ydir = 1;
-			break;
-		case DIR_LEFT:
-			xdir = -1;
-			ydir = 0;
-			break;
-		case DIR_RIGHT:
-			xdir = 1;
-			ydir = 0;
-		default:
-			xdir = 1;
-			ydir = 0;
-	}
-}
-*/
-
 /* A maze on a single surface, uses an array to representeach block */
 class Maze{
 protected:
@@ -592,7 +565,6 @@ void FullMaze::Restore(){
 			s++;
 			k = 0;
 			j = 0;
-
 		}
 	}
 }
