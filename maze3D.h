@@ -416,7 +416,7 @@ void Maze3D::DrawCherry(int x, int y){
 			/* Determine bit color */
 			int bit = largePatternSize*i + j;
 			if(patternCherry[bit] == '0') glColor3ub(255, 255, 255);
-			else if(patternCherry[bit] == '1') glColor3ub(242, 0, 255);
+			else if(patternCherry[bit] == '1') glColor3ub(255, 0, 0);
 			else if(patternCherry[bit] == '2') glColor3ub(170, 138, 67);
 			else glColor3ub(0, 0, 0);	
 			DrawBit(drawX, drawY, drawZ, unit, i, j);
@@ -450,8 +450,6 @@ void Maze3D::DrawPacman(Agent &pacman){
 	/* Load coordinates */
 	double x = pacman.x;
 	double y = pacman.y;
-	int xdir, ydir;
-	Dir2XY(pacman.dir, xdir, ydir);
 
 	/* Origin Point of the graph */
 	double drawX, drawY, drawZ;
@@ -535,7 +533,7 @@ void Maze3D::DrawGhost(Agent &ghost, bool powerState){
 				if(ghostPattern[bit] == '_') glColor3ub(255, 0, 0);
 				else if(ghostPattern[bit] == '1') glColor3ub(255, 255, 255);
 				else if(ghostPattern[bit] == '2') glColor3ub(0, 0, 255);
-				else glColor3ub(0, 0, 255);
+				else glColor3ub(0, 0, 0);
             }
 			
 			DrawBit(drawX, drawY, drawZ, unit, i, j);
@@ -548,6 +546,7 @@ class FullMaze3D{
         Maze3D maze[6]; /* 6 surface maze */
     	bool powerState;
 	public:
+
         FullMaze3D();
 		/* Drawing function */
 		void DrawPacman(Agent &pacman);
@@ -556,6 +555,7 @@ class FullMaze3D{
 		void DrawMaze(int*** fullMaze);
 		
 		void ActivatePowerState();
+		void DeactivatePowerState();
 };
 
 FullMaze3D::FullMaze3D(){
@@ -571,6 +571,9 @@ FullMaze3D::FullMaze3D(){
 
 void FullMaze3D::ActivatePowerState(){
 	powerState = true;
+}
+void FullMaze3D::DeactivatePowerState(){
+	powerState = false;
 }
 
 void FullMaze3D::DrawPacman(Agent &pacman){

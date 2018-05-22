@@ -29,7 +29,7 @@ int blockSize3D = 7;
 const string nullString = "\0";
 
 double myPi = 3.1415926;
-const int ghostNumber = 10;
+//const int ghostNumber = 10;
 
 /* Changes the keyboard commands to pacman control commnads */
 int Key2PacCmd(int key, bool exchangePlayers){

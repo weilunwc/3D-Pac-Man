@@ -281,6 +281,7 @@ void Play::GhostStep(int cmd, int &reward){
 void Play::Reset(bool exchangePlayers, int*** observation){
 	musicPlayer.KeepPlaying();
 	maze.Restart();
+	maze3D.DeactivatePowerState();
 	this->exchangePlayers = exchangePlayers;
 	
 	t0 = time(NULL);

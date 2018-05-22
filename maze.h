@@ -27,7 +27,6 @@ using namespace std;
 extern int blockSize2D;
 extern const int blockNumber;  // the size of the surface array
 extern double myPi;
-extern const int ghostNumber;
 
 /* Commands */
 enum
@@ -127,6 +126,7 @@ typedef struct AgentStruct{
 
 
 /* Returns x y direction from direction */
+/*
 void Dir2XY(int dir, int &xdir, int &ydir){
 	switch(dir){
 		case DIR_UP:
@@ -149,7 +149,7 @@ void Dir2XY(int dir, int &xdir, int &ydir){
 			ydir = 0;
 	}
 }
-
+*/
 
 /* A maze on a single surface, uses an array to representeach block */
 class Maze{
@@ -412,16 +412,10 @@ private:
 	vector<Agent> ghost;
 	int ghostControl;
 	int ghostLives;
-
-	//char pacSurface;
-	int curState; // 1 for not clear, 2 for clear box
-
+	int ghostNumber;
 public:
 	Agent pacman;
-	int ghost_eaten;
-	int pells;
-	int cherries;
-	FullMaze(){};
+	FullMaze();
 	void Draw();
 	void Print();
 	int PacMove();
@@ -451,6 +445,17 @@ public:
 
 };
 
+FullMaze::FullMaze(){
+	ghostNumber = 12;
+	maze[SURFACE_T].SetOrientation(SURFACE_T);
+	maze[SURFACE_N].SetOrientation(SURFACE_N);
+	maze[SURFACE_W].SetOrientation(SURFACE_W);
+	maze[SURFACE_S].SetOrientation(SURFACE_S);
+	maze[SURFACE_E].SetOrientation(SURFACE_E);
+	maze[SURFACE_B].SetOrientation(SURFACE_B);
+}
+
+
 Agent &FullMaze::ReturnPacman(){
 	return pacman;
 }
@@ -464,42 +469,35 @@ Maze* FullMaze::ReturnMaze(){
 
 
 void FullMaze::Restart(){
+	/* restore initial map */
 	SetMaze();
-	maze[SURFACE_T].SetOrientation(SURFACE_T);
-	maze[SURFACE_N].SetOrientation(SURFACE_N);
-	maze[SURFACE_W].SetOrientation(SURFACE_W);
-	maze[SURFACE_S].SetOrientation(SURFACE_S);
-	maze[SURFACE_E].SetOrientation(SURFACE_E);
-	maze[SURFACE_B].SetOrientation(SURFACE_B);
-	//pacSurface = SURFACE_S;
-	ghost_eaten = 0;
-	cherries = 0;
+	
+	/* pacman initial state */
 	pacman.surface = SURFACE_S;
-	curState = 1;
 	pacman.x = 8;
 	pacman.y = 12;
 	pacman.prevX = 8;
 	pacman.prevY = 12;
-	pacman.dir = DIR_STOP;
-	
+	pacman.dir = DIR_STOP;	
 	pacman.powerState = false;
-	pells = 0;
+
+	/* ghost initial state */
 	ghostLives = ghostNumber;
 	ghost.resize(ghostLives);
 	int j = 0;
 	int k = 0;
-	int s = 1;
-	ghostControl = 5;
+	int s = 0;
+	int surfaceSequence[6] = {SURFACE_S, SURFACE_E, SURFACE_W,
+							  SURFACE_N, SURFACE_T, SURFACE_B};
+	ghostControl = 0;
 	for(int i = 0;i < ghostLives;i++){
-		/* direction */
 		if(i != ghostControl){
 			GhostRandom(ghost[i]);
 		}
 		else{
 			ghost[i].dir = DIR_STOP;
 		}
-		/* position */
-		ghost[i].surface = s;
+		ghost[i].surface = surfaceSequence[s];
 		ghost[i].x = k + 11;
 		ghost[i].y = 11;
 		ghost[i].prevX = k + 11;
@@ -562,16 +560,20 @@ int FullMaze::ReturnGhostControl(){
 
 void FullMaze::Restore(){
 	
+	/* pacman initial state */
 	pacman.surface = SURFACE_S;
-	curState = 1;
 	pacman.x = 8;
 	pacman.y = 12;
 	pacman.dir = DIR_STOP;
+	
+	/* ghost inital state */
 	ghost.resize(ghostLives);
+	int surfaceSequence[6] = {SURFACE_S, SURFACE_E, SURFACE_W,
+							  SURFACE_N, SURFACE_T, SURFACE_B};
+	ghostControl = 0;
 	int j = 0;
 	int k = 0;
-	int s = 1;
-	ghostControl = ghostLives % 6;
+	int s = 0;
 	for(int i = 0;i < ghostLives;i++){
 		if(i != ghostControl){
 			GhostRandom(ghost[i]);
@@ -579,7 +581,7 @@ void FullMaze::Restore(){
 		else{
 			ghost[i].dir = DIR_STOP;
 		}
-		ghost[i].surface = s;
+		ghost[i].surface = surfaceSequence[s];
 		ghost[i].x = k+11;
 		ghost[i].y = j+11;
 		ghost[i].prevX = k+11;
