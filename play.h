@@ -22,12 +22,13 @@ protected:
 	YsRawPngDecoder img;
 	YsSoundPlayer musicPlayer;
 	YsSoundPlayer::SoundData pacman_death, cherry, areyouready;
-
+	
 	/* Maze Params*/
 	bool plot3d;
 	View ghostView, pacView;
 	FullMaze maze;
 	FullMaze3D maze3D;
+	int blockNumber;
 
 	/* Maze Information */
 	Agent pacInfo;
@@ -72,6 +73,7 @@ public:
 };
 
 Play::Play(){
+	blockNumber = 25;
 	Setup();
 	plot3d = false;
 
@@ -80,7 +82,9 @@ Play::Play(){
 Play::Play(bool visualize, bool plot3d){
 	if(visualize == true) FsOpenWindow(0, 100, 1600, 600, 1);
 	this->plot3d = plot3d;
+	blockNumber = 25;
 	Setup();
+
 }
 
 /* Render - Assumes main function is only running game */

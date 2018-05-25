@@ -108,10 +108,11 @@ void OrbitingViewer::SetUpCamera(CameraObject &camera)
 /* Controls the view point of player */
 class View{
 private:
+	int blockNumber;
 	CameraObject camera;
 	OrbitingViewer orbit;
 public:
-	View(){};
+	View(){blockNumber = 25;};
 	void KeyboardChangeView();
 	void CameraFollow(int surface, int x, int y);
 	void SetView();

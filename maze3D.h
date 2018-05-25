@@ -5,7 +5,7 @@
 using namespace std;
 
 extern int blockSize3D; // Giada's Modification
-extern const int blockNumber;
+//extern const int blockNumber;
 
 class Maze3D{
 protected:
@@ -13,8 +13,10 @@ protected:
 	Vector origin;
     Vector xDir;
     Vector yDir;
-
-    Color baseColor; // R,G,B
+	
+	int blockNumber;
+    int blockSize3D;
+	Color baseColor; // R,G,B
 	
     /* Graph bitmap */
     void SetPatterns();
@@ -52,12 +54,15 @@ public:
 };
 
 Maze3D::Maze3D(){
-    SetPatterns();
+    blockSize3D = 7;
+	SetPatterns();
 
 	/* Set suface color */
 	baseColor.r = 0;
 	baseColor.g = 0;
 	baseColor.b = 175;
+
+	blockNumber = 25;
 }
 
 /* Set up the graphics bit map */
@@ -542,23 +547,25 @@ void Maze3D::DrawGhost(Agent &ghost, bool powerState){
 }
 
 class FullMaze3D{
-    private:
-        Maze3D maze[6]; /* 6 surface maze */
-    	bool powerState;
-	public:
+private:
+	Maze3D maze[6]; /* 6 surface maze */
+	bool powerState;
+	int blockNumber;
+public:
 
-        FullMaze3D();
-		/* Drawing function */
-		void DrawPacman(Agent &pacman);
-		void DrawGhost(vector<Agent> &ghost);
-		void DrawMaze(Maze* fullMaze);
-		void DrawMaze(int*** fullMaze);
-		
-		void ActivatePowerState();
-		void DeactivatePowerState();
+	FullMaze3D();
+	/* Drawing function */
+	void DrawPacman(Agent &pacman);
+	void DrawGhost(vector<Agent> &ghost);
+	void DrawMaze(Maze* fullMaze);
+	void DrawMaze(int*** fullMaze);
+	
+	void ActivatePowerState();
+	void DeactivatePowerState();
 };
 
 FullMaze3D::FullMaze3D(){
+	blockNumber = 25;
 	/* Set up the six surface orientation and vector */    
 	maze[SURFACE_T].SetOrientation(SURFACE_T);
 	maze[SURFACE_N].SetOrientation(SURFACE_N);

@@ -23,9 +23,9 @@
 
 using namespace std;
 
-const int blockNumber = 25;
-int blockSize2D = 6;
-int blockSize3D = 7;
+//const int blockNumber = 25;
+//int blockSize2D = 6;
+//int blockSize3D = 7;
 const string nullString = "\0";
 
 double myPi = 3.1415926;
@@ -140,8 +140,10 @@ int main(void){
 	Score score;
 	PauseMenu pauseMenu;
 	bool plot3d = true, visualize = true;
+
 	Play play(visualize, plot3d);
 	
+	cout << "start" << endl;
 	FsOpenWindow(0, 100, 1600, 600, 1);
 	FsPollDevice();
 	int key = FsInkey();

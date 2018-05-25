@@ -24,8 +24,6 @@
 using namespace std;
 
 /* Global variables shared by the whole program */
-extern int blockSize2D;
-extern const int blockNumber;  // the size of the surface array
 extern double myPi;
 
 /* Commands */
@@ -128,6 +126,8 @@ typedef struct AgentStruct{
 class Maze{
 protected:
 	int **maze;
+	int blockNumber;
+	int blockSize2D;
 	Vector origin; // the (0,0) point on the global coordinates
 	Color baseColor; // R,G,B
 
@@ -149,6 +149,8 @@ public:
 };
 
 Maze::Maze(){
+	blockNumber = 25;
+	blockSize2D = 6;
 	maze = new int*[blockNumber];
 	for(int i = 0;i < blockNumber;i++){
 		maze[i] = new int [blockNumber];
@@ -381,7 +383,7 @@ void Maze::Draw(){
 class FullMaze{
 private:
 	Maze maze[6]; // 0-T,1-N,2-W,3-S,4-E,5-B
-
+	int blockNumber;
 	vector<Agent> ghost;
 	int ghostControl;
 	int ghostLives;
@@ -419,6 +421,7 @@ public:
 };
 
 FullMaze::FullMaze(){
+	blockNumber = 25;
 	ghostNumber = 12;
 	maze[SURFACE_T].SetOrientation(SURFACE_T);
 	maze[SURFACE_N].SetOrientation(SURFACE_N);
