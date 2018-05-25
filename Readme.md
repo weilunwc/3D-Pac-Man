@@ -34,7 +34,4 @@ Player 1: control the Pacman or Ghosts by W(UP) S(DOWN) A(LEFT) D(RIGHT)
 Player 2: control the Pacman or Ghosts by UP(UP) DOWN(DOWN) LEFT(LEFT) RIGHT(RIGHT)
           switch the control of Ghosts by pressing M
 
-=======================================================================================
-A poster for Monday presentation has been included in this same folder
-========================================================================================
         
